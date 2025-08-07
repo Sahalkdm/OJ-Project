@@ -1,0 +1,171 @@
+import React, { useState } from "react";
+import TextArea from "../components/TextArea";
+import { createProblem } from "../api/problemApi";
+import { Navigate, useNavigate } from "react-router-dom";
+import { ToastContainer, toast } from "react-toastify";
+
+const AddProblemPage = () => {
+  const [title, setTitle] = useState("");
+  const [statement, setStatement] = useState("");
+  const [difficulty, setDifficulty] = useState("");
+  const [sampleIO, setSampleIO] = useState([
+    { input: "", output: "", explanation: "" },
+  ]);
+  const [constraints, setConstraints] = useState("");
+  const [inputFormat, setInputFormat] = useState("");
+  const [outputFormat, setOutputFormat] = useState("");
+
+  const resetForm = () => {
+    setTitle("");
+    setStatement("");
+    setDifficulty("");
+    setSampleIO([{ input: "", output: "", explanation: "" }]);
+    setConstraints("");
+    setInputFormat("");
+    setOutputFormat("");
+  };
+
+  const navigate = useNavigate();
+
+  const handleSampleChange = (index, field, value) => {
+    const updated = [...sampleIO];
+    updated[index][field] = value;
+    setSampleIO(updated);
+  };
+
+  const addSample = () => {
+    setSampleIO([...sampleIO, { input: "", output: "", explanation: "" }]);
+  };
+
+  const removeSample = (index) => {
+    const updated = [...sampleIO];
+    updated.splice(index, 1);
+    setSampleIO(updated);
+  };
+
+    const handleError = (err) =>
+      toast.error(err, {
+        position: "bottom-left",
+      });
+  
+    const handleSuccess = (msg) =>
+      toast.success(msg, {
+        position: "bottom-right",
+      });
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    const problem = {
+      title,
+      statement,
+      difficulty,
+      examples: sampleIO,
+      constraints,
+      input_format: inputFormat,
+      output_format: outputFormat,
+    };
+    console.log("Submitted Problem:", problem);
+    try {
+      const res = await createProblem(problem);
+
+      const { success, message } = res;
+
+      if (success){
+        handleSuccess(message);
+        resetForm();
+        navigate('/');
+      }else{
+        handleError(message)
+      }
+    } catch (error) {
+      console.log(error)
+    }
+  };
+
+  return (
+    <div className="max-w-5xl mx-auto p-6 bg-white shadow rounded-lg my-8">
+      <h1 className="text-2xl font-bold mb-6 text-gray-800">Add New Problem</h1>
+      <form onSubmit={handleSubmit} className="grid grid-cols-1 gap-4">
+        <TextArea label="Title" value={title} setValue={setTitle} rows={2} placeholder="Enter problem title" />
+        <TextArea label="Statement" value={statement} setValue={setStatement} rows={6} placeholder="Describe the problem statement" />
+
+        {/* Difficulty Dropdown */}
+        <div className="flex flex-col gap-1 mb-4 w-full">
+          <label className="font-semibold text-gray-800">Difficulty</label>
+          <select
+            value={difficulty}
+            onChange={(e) => setDifficulty(e.target.value)}
+            className="border border-gray-300 rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          >
+            <option value={"Easy"}>Easy</option>
+            <option value={"Medium"}>Medium</option>
+            <option value={"Hard"}>Hard</option>
+          </select>
+        </div>
+
+        {/* Dynamic Input/Output Pairs */}
+        <div className="mb-4">
+          <label className="block font-semibold text-gray-800 mb-2">Sample Inputs & Outputs</label>
+          {sampleIO.map((sample, index) => (
+            <div key={index} className="flex flex-col md:flex-row items-start gap-2 mb-3 relative">
+              <textarea
+                className="flex-1 border border-gray-300 rounded-md p-2 resize-none focus:outline-none focus:ring-2 focus:ring-blue-500 w-full"
+                placeholder={`Sample Input ${index + 1}`}
+                value={sample.input}
+                rows={2}
+                onChange={(e) => handleSampleChange(index, "input", e.target.value)}
+              />
+              <textarea
+                className="flex-1 border border-gray-300 rounded-md p-2 resize-none focus:outline-none focus:ring-2 focus:ring-blue-500 w-full"
+                placeholder={`Sample Output ${index + 1}`}
+                value={sample.output}
+                rows={2}
+                onChange={(e) => handleSampleChange(index, "output", e.target.value)}
+              />
+              <textarea
+                className="flex-1 border border-gray-300 rounded-md p-2 resize-none focus:outline-none focus:ring-2 focus:ring-blue-500 w-full"
+                placeholder={`Explanation ${index + 1} (Optional)`}
+                value={sample.explanation}
+                rows={2}
+                onChange={(e) => handleSampleChange(index, "explanation", e.target.value)}
+              />
+
+              {sampleIO.length > 1 && (
+                <button
+                  type="button"
+                  onClick={() => removeSample(index)}
+                  className="text-red-500 hover:text-red-700 transition mt-1 md:mt-0"
+                  title="Remove this sample"
+                >
+                  🗑️
+                </button>
+              )}
+            </div>
+          ))}
+
+          <button
+            type="button"
+            onClick={addSample}
+            className="text-sm bg-green-600 text-white px-3 py-1 rounded hover:bg-green-700"
+          >
+            + Add Sample
+          </button>
+        </div>
+
+        <TextArea label="Constraints" value={constraints} setValue={setConstraints} rows={3} placeholder="Any input/output constraints" />
+        <TextArea label="Input Format" value={inputFormat} setValue={setInputFormat} rows={3} placeholder="Explain input format here" />
+        <TextArea label="Output Format" value={outputFormat} setValue={setOutputFormat} rows={3} placeholder="Explain output format here" />
+
+        <button
+          type="submit"
+          className="mt-4 w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded"
+        >
+          Submit Problem
+        </button>
+      </form>
+      <ToastContainer />
+    </div>
+  );
+};
+
+export default AddProblemPage;
