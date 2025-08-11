@@ -9,7 +9,7 @@ const authMiddleware = async (req, res, next) => {
     if (!token) {
       return res.status(401).json({
         success: false,
-        message: "Access denied. No token provided."
+        message: "Access denied. No user found"
       });
     }
 
@@ -17,17 +17,17 @@ const authMiddleware = async (req, res, next) => {
     const decoded = jwt.verify(token, process.env.SECRET_KEY);
 
     // Find user from payload
-    const user = await User.findById(decoded.id).select("-password");
+    // const user = await User.findById(decoded.id).select("-password");
 
-    if (!user) {
-      return res.status(401).json({
-        success: false,
-        message: "Invalid token. User not found."
-      });
-    }
+    // if (!user) {
+    //   return res.status(401).json({
+    //     success: false,
+    //     message: "Invalid token. User not found."
+    //   });
+    // }
 
     // Attach user to request
-    req.user = user;
+    req.user = decoded;
 
     next();
   } catch (error) {

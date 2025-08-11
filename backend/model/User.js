@@ -52,6 +52,12 @@ const userSchema = new mongoose.Schema({
         required: [true, "Password is required"],
         minlength: [6, "Password must be at least 6 characters long"]
     },
+
+    // user or admin
+    isAdmin: {
+        type: Boolean,
+        default: false,
+    },
     
     // Add timestamp fields for tracking when user was created/updated
 }, {

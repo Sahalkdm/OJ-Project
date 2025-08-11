@@ -1,10 +1,15 @@
 import React, { useState } from "react";
 import TextArea from "../components/TextArea";
-import { createProblem } from "../api/problemApi";
-import { Navigate, useNavigate } from "react-router-dom";
+import { createProblem, GetProblemById, UpdateProblem } from "../api/problemApi";
+import { Navigate, useNavigate, useParams } from "react-router-dom";
 import { ToastContainer, toast } from "react-toastify";
+import { useEffect } from "react";
 
 const AddProblemPage = () => {
+
+  const { problem_id } = useParams(); // id will be undefined when adding new
+  const navigate = useNavigate();
+
   const [title, setTitle] = useState("");
   const [statement, setStatement] = useState("");
   const [difficulty, setDifficulty] = useState("");
@@ -15,6 +20,32 @@ const AddProblemPage = () => {
   const [inputFormat, setInputFormat] = useState("");
   const [outputFormat, setOutputFormat] = useState("");
 
+  useEffect(() => {
+    if (problem_id) {
+      const fetchProblem = async () => {
+        try {
+          const res = await GetProblemById(problem_id); // create this API call
+          const {problem, success, message} = res
+          if (success) {
+            setTitle(problem.title);
+            setStatement(problem.statement);
+            setDifficulty(problem.difficulty);
+            setSampleIO(problem.examples || [{ input: "", output: "", explanation: "" }]);
+            setConstraints(problem.constraints);
+            setInputFormat(problem.input_format);
+            setOutputFormat(problem.output_format);
+          }else{
+            handleError(message);
+          }
+        } catch (error) {
+          handleError("Failed to load problem data");
+        }
+      };
+      fetchProblem();
+    }
+  }, [problem_id]);
+
+
   const resetForm = () => {
     setTitle("");
     setStatement("");
@@ -24,8 +55,6 @@ const AddProblemPage = () => {
     setInputFormat("");
     setOutputFormat("");
   };
-
-  const navigate = useNavigate();
 
   const handleSampleChange = (index, field, value) => {
     const updated = [...sampleIO];
@@ -66,14 +95,22 @@ const AddProblemPage = () => {
     };
     console.log("Submitted Problem:", problem);
     try {
-      const res = await createProblem(problem);
+      
+      let res;
+      if (problem_id) {
+        // Update existing problem
+        res = await UpdateProblem(problem_id, problem);
+      } else {
+        // Create new problem
+        res = await createProblem(problem);
+      }
 
       const { success, message } = res;
 
       if (success){
         handleSuccess(message);
         resetForm();
-        navigate('/');
+        navigate('/problems');
       }else{
         handleError(message)
       }
@@ -84,7 +121,7 @@ const AddProblemPage = () => {
 
   return (
     <div className="max-w-5xl mx-auto p-6 bg-white shadow rounded-lg my-8">
-      <h1 className="text-2xl font-bold mb-6 text-gray-800">Add New Problem</h1>
+      <h1 className="text-2xl font-bold mb-6 text-gray-800">{problem_id ? 'Update Problem' : 'Add New Problem'}</h1>
       <form onSubmit={handleSubmit} className="grid grid-cols-1 gap-4">
         <TextArea label="Title" value={title} setValue={setTitle} rows={2} placeholder="Enter problem title" />
         <TextArea label="Statement" value={statement} setValue={setStatement} rows={6} placeholder="Describe the problem statement" />
@@ -160,7 +197,7 @@ const AddProblemPage = () => {
           type="submit"
           className="mt-4 w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded"
         >
-          Submit Problem
+          {problem_id ? 'Update Problem' : 'Submit Problem'}
         </button>
       </form>
       <ToastContainer />

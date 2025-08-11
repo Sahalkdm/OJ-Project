@@ -12,7 +12,8 @@ const problemSchema = new mongoose.Schema({
     required: [true, "Problem title is required"],
     trim: true,
     minlength: [5, "Title must be at least 5 characters long"],
-    maxlength: [100, "Title cannot exceed 100 characters"]
+    maxlength: [100, "Title cannot exceed 100 characters"],
+    index:true,
   },
 
   // Detailed problem description

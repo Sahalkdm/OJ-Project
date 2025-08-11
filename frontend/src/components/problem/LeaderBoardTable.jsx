@@ -1,41 +1,34 @@
 import React from 'react'
 import { useEffect } from 'react';
 import { useState } from 'react';
-import { DeleteProblem, GetAllProblems } from '../../api/problemApi';
-import { ToastContainer, toast } from "react-toastify";
-import { Link } from 'react-router-dom';
+import { GetLeaderboardInfo } from '../../api/problemApi';
+import { toast } from "react-toastify";
 import { useAuth } from '../../hooks/AuthProvides';
-import ConfirmModal from '../CofirmModal';
 
-function ProblemsTable() {
+function LeaderBoardTable() {
 
-    const { user } = useAuth();
-    const isAdmin = user?.isAdmin || false
+    // const { user } = useAuth();
+    // const isAdmin = user?.isAdmin || false
 
-    const [problems, setProblems] = useState([]);
-    const [isModalOpen, setIsModalOpen] = useState(false);
-    const [selectedId, setSelectedId] = useState(null);
-
-    const handleOpenModal = (id) => {
-        setSelectedId(id);
-        setIsModalOpen(true);
-    };
-
-    const fetchProblems = async () =>{
-        try {
-            const res = await GetAllProblems();
-            if (res?.success){
-                setProblems(res?.problems)
-            }else{
-                handleError(res?.message || "Error loading probles")
-            }
-        } catch (error) {
-            handleError(error?.message || "Error loading probles")
-        }
-    }
+    const [leaderboard, setLeaderboard] = useState([]);
 
     useEffect(()=>{
-        fetchProblems();
+
+        const fetchLeaderboard = async () =>{
+            try {
+                const res = await GetLeaderboardInfo();
+                console.log(res)
+                if (res?.success){
+                    setLeaderboard(res?.leaderboard)
+                }else{
+                    handleError(res?.message || "Error loading leaderboard")
+                }
+            } catch (error) {
+                handleError(error?.message || "Error loading leaderboard")
+            }
+        }
+
+        fetchLeaderboard();
     }, [])
 
       const handleError = (err) =>
@@ -48,28 +41,11 @@ function ProblemsTable() {
           position: "bottom-right",
         });
 
-    const handleDelete = async () => {
-        try {
-            const res = await DeleteProblem(selectedId);
-            if (res.success) {
-                fetchProblems(); // refresh list
-                handleSuccess(res.message);
-            }else{
-                handleError(res.message);
-            }
-        } catch (err) {
-            console.error(err);
-            handleError(err.message || "Error deleting problem!");
-        } finally {
-            setIsModalOpen(false);
-        }
-    };
-
   return (
     <div>
         <div className="w-full flex justify-between items-center mb-3 mt-1 pl-3">
             <div>
-            <h3 className="text-lg font-semibold text-slate-800">Problem List</h3>
+            <h3 className="text-lg font-semibold text-slate-800">Leaderboard</h3>
             <p className="text-slate-500">Overview of all created problems.</p>
             </div>
             <div className="ml-3">
@@ -77,7 +53,7 @@ function ProblemsTable() {
                 <div className="relative">
                 <input
                     className="bg-white w-full pr-11 h-10 pl-3 py-2 bg-transparent placeholder:text-slate-400 text-slate-700 text-sm border border-slate-200 rounded transition duration-200 ease focus:outline-none focus:border-slate-400 hover:border-slate-400 shadow-sm focus:shadow-md"
-                    placeholder="Search problems..."
+                    placeholder="Search Names..."
                 />
                 <button
                     className="absolute h-8 w-8 right-1 top-1 my-auto px-2 flex items-center bg-white rounded"
@@ -114,72 +90,35 @@ function ProblemsTable() {
                 </th>
                 <th className="p-4 border-b border-slate-200 bg-slate-50">
                     <p className="text-sm font-normal leading-none text-slate-500">
-                    Title
+                    Name
                     </p>
                 </th>
                 <th className="p-4 border-b border-slate-200 bg-slate-50">
                     <p className="text-sm font-normal leading-none text-slate-500">
-                    Difficulty
+                    Score
                     </p>
                 </th>
-
-                {/* set only for admins */}
-                {/* Edit test cases page */}
-                {isAdmin && <th className="p-4 border-b border-slate-200 bg-slate-50">
-                    <p className="text-sm font-normal leading-none text-slate-500">
-                    Edit Test Cases
-                    </p>
-                </th>}
-
-                {/* Edit problem page */}
-                {isAdmin && <th className="p-4 border-b border-slate-200 bg-slate-50">
-                    <p className="text-sm font-normal leading-none text-slate-500">
-                    Edit
-                    </p>
-                </th>}
-
-                {isAdmin && <th className="p-4 border-b border-slate-200 bg-slate-50">
-                    <p className="text-sm font-normal leading-none text-slate-500">
-                    Delete
-                    </p>
-                </th>}
-
                 </tr>
             </thead>
             <tbody>
-                {problems.length === 0 ? (
+                {leaderboard.length === 0 ? (
                 <tr>
                     <td colSpan="3" className="p-4 text-slate-500 text-sm text-center">
-                    No problems found.
+                    No Users found.
                     </td>
                 </tr>
                 ) : (
-                problems.map((problem, index) => (
-                    <tr key={index} className="hover:bg-slate-50 border-b border-slate-200">
+                leaderboard.map((data, index) => (
+                    <tr key={data?.user_id} className="hover:bg-slate-50 border-b border-slate-200">
                     <td className="p-4 py-5">
                         <p className="block font-semibold text-sm text-slate-800">{index + 1}</p>
                     </td>
                     <td className="p-4 py-5">
-                        <Link to={`/problem/${problem._id}`}><p className="text-sm text-slate-500">{problem.title}</p></Link>
+                       <p className="text-sm text-slate-500">{data?.name}</p>
                     </td>
                     <td className="p-4 py-5">
-                        <p className="text-sm text-slate-500">{problem.difficulty}</p>
+                        <p className="text-sm text-slate-500">{data?.totalScore}</p>
                     </td>
-
-                    {/* Set only for admins */}
-                    {/* Edit test cases */}
-                    {isAdmin && <td className="p-4 py-5">
-                        <Link to={`/add-testcases/${problem._id}`}><p className="text-sm text-slate-500">Add/Edit</p></Link>
-                    </td>}
-
-                    {/* Edit test cases */}
-                    {isAdmin && <td className="p-4 py-5">
-                        <Link to={`/add-problem/${problem._id}`}><p className="text-sm text-slate-500">Edit</p></Link>
-                    </td>}
-
-                    {isAdmin && <td className="p-4 py-5">
-                        <p onClick={() => handleOpenModal(problem._id)} className="text-sm text-slate-500 cursor-pointer">Delete</p>
-                    </td>}
                     </tr>
                 ))
                 )}
@@ -188,7 +127,7 @@ function ProblemsTable() {
 
             <div className="flex justify-between items-center px-4 py-3">
             <div className="text-sm text-slate-500">
-                Showing <b>1–{problems.length}</b> of {problems.length}
+                Showing <b>1–{leaderboard?.length}</b> of {leaderboard?.length}
             </div>
             <div className="flex space-x-1">
                 <button className="px-3 py-1 min-w-9 min-h-9 text-sm font-normal text-slate-500 bg-white border border-slate-200 rounded hover:bg-slate-50 hover:border-slate-400 transition duration-200 ease">
@@ -209,19 +148,8 @@ function ProblemsTable() {
             </div>
             </div>
         </div>
-
-        <ConfirmModal
-            isOpen={isModalOpen}
-            title="Are you sure you want to delete this problem?"
-            message="This action cannot be undone and the problem will be permanently removed."
-            confirmText="Yes, Delete"
-            cancelText="No, Cancel"
-            onConfirm={handleDelete}
-            onCancel={() => setIsModalOpen(false)}
-        />
-
     </div>
   )
 }
 
-export default ProblemsTable
+export default LeaderBoardTable

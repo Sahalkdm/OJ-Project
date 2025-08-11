@@ -14,7 +14,7 @@ function LoginBox() {
     const location = useLocation();
 
     const from = location.state?.from?.pathname || "/"; // fallback to homepage
-
+    console.log("from: ", from)
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
 
@@ -49,7 +49,7 @@ function LoginBox() {
             navigate(from, { replace: true });
           }
            // redirect to intended route
-        }, 100);
+        }, 1000);
       } else {
         handleError(message);
       }
@@ -85,7 +85,6 @@ function LoginBox() {
                 </div>
             </div>
         </div>
-        <ToastContainer/>
     </Card>
   )
 }

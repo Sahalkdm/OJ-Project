@@ -6,6 +6,8 @@ const jwt = require("jsonwebtoken");
 const cookieParser = require("cookie-parser");
 const authRoute = require("./routes/authRoute")
 const problemRoute = require("./routes/problemRoute")
+const codeRunRoute = require("./routes/codeRunRoute")
+const userRoute = require("./routes/userRoute")
 const { DBConnection } = require("./config/db")
 
 dotenv.config();
@@ -28,7 +30,8 @@ app.use(cookieParser());
 // defining the auth route
 app.use("/auth", authRoute);
 app.use("/api/problem", problemRoute);
-
+app.use("/api/user", userRoute);
+app.use('/run', codeRunRoute);
 
 app.get("/", (req, res)=>{
     res.status(200).json({

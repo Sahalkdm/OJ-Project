@@ -11,6 +11,9 @@ import CodePage from './pages/CodePage'
 import ProtectedRoute from './pages/ProtectedRoute'
 import AddProblemPage from './pages/AddProblemPage'
 import ProblemList from './pages/ProblemList'
+import AddTestCases from './pages/AddTestCases'
+import AdminRoute from './pages/AdminRoute'
+import LeaderBoard from './pages/LeaderBoard'
 
 function App() {
 
@@ -21,10 +24,15 @@ function App() {
           <Route index element={<Home/>}/>
           <Route path='register' element={<Register/>}/>
           <Route path='login' element={<Login/>}/>
-          <Route path='add-problem' element={<AddProblemPage/>}/>
+          <Route element = {<AdminRoute/>}>
+            <Route path='add-problem' element={<AddProblemPage/>}/>
+            <Route path='add-problem/:problem_id' element={<AddProblemPage/>}/>
+            <Route path='add-testcases/:problem_id' element={<AddTestCases/>}/>
+          </Route>
           <Route path='problems' element={<ProblemList/>}/>
           <Route element={<ProtectedRoute/>}>
             <Route path='/problem/:problem_id' element={<CodePage/>}/>
+            <Route path='/leaderboard' element={<LeaderBoard/>}/>
           </Route>
           <Route path="*" element={<NoPage />} />
         </Route>

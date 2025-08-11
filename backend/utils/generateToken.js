@@ -5,9 +5,9 @@ dotenv.config();
 
 const generateToken = (user) => {
   const payload = {
-    id: user._id,
-    email: user.email,
-    type: user.type // Optional: add user type (e.g., admin, student, etc.)
+    id: user?._id,
+    email: user?.email,
+    isAdmin: user?.isAdmin // Optional: add user type (e.g., admin, student, etc.)
   };
 
   const options = {

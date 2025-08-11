@@ -163,39 +163,26 @@ module.exports.Logout = async (req, res, next) => {
 
 module.exports.UserVerification = async (req, res, next) => {
     try {
-        const token = req.cookies.token;
-        if (!token){
-            return res.status(401).json({ success: false, message: "No token provided" });
+        const userData = req.user
+        const user = await User.findById(userData?.id);
+        if (user){
+            const userResponse = {
+                _id: user._id,
+                firstname: user.firstname,
+                lastname: user.lastname,
+                email: user.email,
+                isAdmin: user.isAdmin,
+            };
+            return res.status(200).json({success:true, user:userResponse, message: "Login Successful!"});
+        }else{
+            return res.status(401).json({ success: false, message: "User not found" });
         }
-
-        jwt.verify(token, process.env.SECRET_KEY, async (error, data) =>{
-            if (error){
-                res.status(500).json({
-                    success: false,
-                    message: "Internal server error during login"
-                });
-            }else{
-                const user = await User.findById(data.id);
-                if (user){
-                    const userResponse = {
-                        _id: user._id,
-                        firstname: user.firstname,
-                        lastname: user.lastname,
-                        email: user.email,
-                        type: user.type,
-                    };
-                    return res.status(200).json({success:true, user:userResponse, message: "Login Successful!"});
-                }else{
-                    return res.status(401).json({ success: false, message: "Invalid token or user not found" });
-                }
-            }
-        })
 
     } catch (error) {
         console.error("Login error:", error);
-        res.status(500).json({
+        res.status(401).json({
             success: false,
-            message: "Internal server error during verify"
+            message: "Error verifying user"
         });
     }
 }
