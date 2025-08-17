@@ -4,6 +4,10 @@ const TestCase = require("../model/TestCase");
 const UserProblemScore = require("../model/UserProblemScore");
 const { runCodeOnCompiler } = require("../utils/codeRunner");
 const evaluateSubmission = require("../utils/evaluateSubmission");
+const { GoogleGenAI } = require("@google/genai");
+const dotenv = require('dotenv');
+
+const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
 
 module.exports.RunTestCode = async (req, res) => {
   try {
@@ -17,8 +21,7 @@ module.exports.RunTestCode = async (req, res) => {
     for (let i = 0; i < testCases.length; i++) {
       const { input = "", output: expectedOutput = "" } = testCases[i];
 
-      console.log(input)
-      const runResult = await runCodeOnCompiler({ code, language, input, timeout: 2000 });
+      const runResult = await runCodeOnCompiler({ code, language, input, timeout: 4000 });
 
       const passed = runResult.success && runResult.output === expectedOutput.trim()
       const testStatus = runResult?.success ? (passed ? "OK" : "WA") : runResult?.status
@@ -40,7 +43,6 @@ module.exports.RunTestCode = async (req, res) => {
       output: results,
     });
   } catch (err) {
-    console.error("Error running test cases:", err);
     res.status(500).json({ success: false, message: err?.message || "Internal server error", output: [] });
   }
 };
@@ -50,7 +52,7 @@ module.exports.RunCustomTestCode = async (req, res) => {
     const { code, language, testcase = "" } = req.body;
     console.log(testcase)
 
-    const runResult = await runCodeOnCompiler({ code, language, input:testcase, timeout: 2000 });
+    const runResult = await runCodeOnCompiler({ code, language, input:testcase, timeout: 4000 });
     console.log(runResult)
     res.status(201).json({
       success: true,
@@ -81,7 +83,7 @@ module.exports.SubmitCode = async (req, res) => {
     for (let i = 0; i < testCases.length; i++) {
       const { input = "", output: expectedOutput = "", hidden } = testCases[i];
 
-      const runResult = await runCodeOnCompiler({ code, language, input, timeout: 2000 });
+      const runResult = await runCodeOnCompiler({ code, language, input, timeout: 4000 });
 
       const passed = runResult.success && runResult.output === expectedOutput.trim();
       const testStatus = runResult?.success ? (passed ? "OK" : "WA") : runResult?.status
@@ -132,3 +134,25 @@ module.exports.SubmitCode = async (req, res) => {
     res.status(500).json({ success: false, message: err?.message || "Internal server error", output: [] });
   }
 };
+
+module.exports.GetReview = async (req, res) => {
+  const {language, code} = req.body;
+  try {
+    const response = await ai.models.generateContent({
+      model: "gemini-2.0-flash",
+      contents: `Analyze the following code in ${language}, and provide a short and concise review of the code. 
+      Also, provide a list of potential improvements and suggestions for the code. **Do not provide solution**.
+      Code: ${code}`,
+    });
+     res.status(201).json({
+      success:true,
+      message:"Code Reviewed Successfully!",
+      review:response?.text
+     })
+  } catch (error) {
+    res.status(500).json({
+      success:true,
+      message:"Error generating review!",
+     })
+  }
+}

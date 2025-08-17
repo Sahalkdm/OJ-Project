@@ -5,7 +5,7 @@ import { FaUser, FaLock, FaPhone, FaEnvelope, FaFacebookF, FaTwitter, FaGoogle }
 import Button from '../Button';
 import { registerUser } from '../../api/authApi';
 import { ToastContainer, toast } from "react-toastify";
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 
 function RegisterBox() {
 
@@ -51,9 +51,9 @@ function RegisterBox() {
   }
 
   return (
-    <Card className='h-fit w-full'>
+    <Card className='h-fit w-full dark:bg-gray-700 dark:text-gray-100'>
         <div className="flex w-full flex-col items-center min-w-md">
-                <h2 className='text-xl font-bold text-gray-800 p-4'>Register</h2>
+                <h2 className='text-xl font-bold text-gray-800 dark:text-gray-50 p-4'>Register</h2>
                 <form className='w-full' onSubmit={onSubmitHandler}>
                   <div className="w-full flex md:flex-row flex-col gap-3">
                     <InputField type='text' placeholder={'First Name'} icon={FaUser} value={firstname} setValue={setFirstname} required={true}/>
@@ -71,11 +71,14 @@ function RegisterBox() {
                   </div>
 
                   <div className='p-3 text-center'>
-                      <Button disabled={password != cnfPassword} type='submit'>Register</Button>
+                      <Button disabled={password != cnfPassword} type='submit' className='dark:bg-violet-600'>Register</Button>
                   </div>
                 </form>
             </div>
-            <ToastContainer />
+
+            <div className='flex gap-1 justify-end text-sm'>
+              <p>Already have accout? </p><Link className='hover:underline text-blue-600 dark:text-blue-300' to={'/login'}>Login</Link>
+            </div>
     </Card>
   )
 }

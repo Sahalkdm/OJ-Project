@@ -2,25 +2,45 @@ const fs = require('fs');
 const path = require('path');
 const { v4: uuidv4 } = require('uuid');
 
-const file_folder_path = path.join(__dirname, '..');
-const code_dir = path.join(file_folder_path, 'codes');
+const file_folder_path = path.join(__dirname, '..', 'codes');
 
-if (!fs.existsSync(code_dir)){
-    fs.mkdirSync(code_dir, {recursive: true});
+if (!fs.existsSync(file_folder_path)) {
+    fs.mkdirSync(file_folder_path, { recursive: true });
 }
 
-const generateFile = (format, content) =>{
+const generateFile = (language, content) => {
     const jobID = uuidv4();
-    const filename = `${jobID}.${format}`;
-    const file_path = path.join(code_dir, filename);
+    const folderPath = path.join(file_folder_path, jobID);
 
-    fs.writeFileSync(file_path, content);
-    return file_path;
-}
+    fs.mkdirSync(folderPath, { recursive: true });
 
-module.exports = {
-    generateFile,
-}
+    // Choose filename based on language
+    let filename;
+    switch (language) {
+        case 'cpp':
+            filename = 'main.cpp';
+            break;
+        case 'java':
+            filename = 'Main.java'; // enforce Main for Java
+            break;
+        case 'py':
+            filename = 'main.py';
+            break;
+        case 'js':
+            filename = 'main.js';
+            break;
+        default:
+            throw new Error('Unsupported language');
+    }
+
+    const filePath = path.join(folderPath, filename);
+    fs.writeFileSync(filePath, content);
+
+    return { filePath, folderPath, jobID, filename };
+};
+
+module.exports = { generateFile };
+
 
 
 /**

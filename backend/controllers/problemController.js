@@ -42,7 +42,7 @@ module.exports.createProblem = async (req, res, next) => {
       constraints: constraints?.trim() || "",
       input_format: input_format?.trim() || "",
       output_format: output_format?.trim() || "",
-      createdBy:user?._id,
+      createdBy:user?.id,
     });
 
     res.status(201).json({

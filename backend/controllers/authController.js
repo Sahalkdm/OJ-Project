@@ -1,7 +1,7 @@
 const User = require("../model/User");
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcryptjs");
-const generateToken = require("../utils/generateToken");
+const { generateRefreshToken, generateAccessToken } = require("../utils/generateToken");
 
 module.exports.Signup = async (req, res, next) =>{
     try{
@@ -33,8 +33,6 @@ module.exports.Signup = async (req, res, next) =>{
             password: hashedPassword,
         });
 
-        const token = generateToken(user);
-
         const userResponse = {
             _id: user._id,
             firstname: user.firstname,
@@ -48,7 +46,6 @@ module.exports.Signup = async (req, res, next) =>{
             success: true,
             message: "User registered successfully!",
             user: userResponse,
-            token: token
         });
     }catch (error) {
         console.error("Registration error:", error);
@@ -105,10 +102,11 @@ module.exports.Login = async (req, res, next) => {
             })
         }
 
-        const token = generateToken(user);
+        const refresh_token = generateRefreshToken(user);
+        const access_token = generateAccessToken(user);
 
         const cookieOptions = {
-            expires: new Date(Date.now() + 60*60*1000),
+            expires: new Date(Date.now() + 7*24*60*60*1000),
             httpOnly: true,
             secure: process.env.NODE_ENV === 'production',
             sameSite: 'strict'
@@ -119,16 +117,16 @@ module.exports.Login = async (req, res, next) => {
             firstname: user.firstname,
             lastname: user.lastname,
             email: user.email,
-            type: user.type,
+            isAdmin: user.isAdmin,
         };
 
         res.status(200)
-            .cookie("token", token, cookieOptions)
+            .cookie("token", refresh_token, cookieOptions)
             .json({
                 success:true,
                 message: "Login Successful!",
                 user: userResponse,
-                token: token
+                token: access_token
             })
 
     } catch (error) {
@@ -186,3 +184,23 @@ module.exports.UserVerification = async (req, res, next) => {
         });
     }
 }
+
+module.exports.refreshToken = async (req, res) => {
+  const token = req.cookies.token;
+  console.log("refreshed Token");
+  if (!token) return res.status(401).json({ success: false, message: "Please Login" });
+
+  try {
+    const decoded = jwt.verify(token, process.env.REFRESH_SECRET);
+    const user = await User.findById(decoded.id);
+
+    if (!user) {
+      return res.status(403).json({ success: false, message: "Invalid refresh token" });
+    }
+
+    const newAccessToken = generateAccessToken(user);
+    return res.status(200).json({ success: true, accessToken: newAccessToken });
+  } catch (err) {
+    return res.status(403).json({ success: false, message: "Refresh token expired" });
+  }
+};

@@ -1,12 +1,13 @@
 // src/api/authApi.js
 import axios from 'axios';
+import api from './axiosInstance';
 
 const BASE_URL = 'http://localhost:8080'; // change to backend URL
 
 // Register
 export const createProblem = async (data) => {
   try {
-    const response = await axios.post(
+    const response = await api.post(
         `${BASE_URL}/api/problem/create`, 
         data,
         { withCredentials: true }
@@ -19,7 +20,7 @@ export const createProblem = async (data) => {
 
 export const GetAllProblems = async () => {
   try {
-    const response = await axios.get(
+    const response = await api.get(
         `${BASE_URL}/api/problem/get-all`, 
         { withCredentials: true }
     );
@@ -31,7 +32,7 @@ export const GetAllProblems = async () => {
 
 export const GetProblemById = async (id) => {
   try {
-    const response = await axios.get(
+    const response = await api.get(
         `${BASE_URL}/api/problem/${id}`, 
         { withCredentials: true }
     );
@@ -43,7 +44,7 @@ export const GetProblemById = async (id) => {
 
 export const UpdateProblem = async (id, data) => {
   try {
-    const response = await axios.put(
+    const response = await api.put(
         `${BASE_URL}/api/problem/update/${id}`, 
         data,
         { withCredentials: true }
@@ -56,7 +57,7 @@ export const UpdateProblem = async (id, data) => {
 
 export const DeleteProblem = async (id, data) => {
   try {
-    const response = await axios.delete(
+    const response = await api.delete(
         `${BASE_URL}/api/problem/delete/${id}`, 
         { withCredentials: true }
     );
@@ -68,7 +69,7 @@ export const DeleteProblem = async (id, data) => {
 
 export const SaveTestCases = async (id, data) => {
   try {
-    const response = await axios.post(
+    const response = await api.post(
         `${BASE_URL}/api/problem/${id}/create-test-cases`, 
         {testCases: data},
         { withCredentials: true }
@@ -81,7 +82,7 @@ export const SaveTestCases = async (id, data) => {
 
 export const getTestCasesByProblem = async (id) => {
   try {
-    const response = await axios.get(
+    const response = await api.get(
         `${BASE_URL}/api/problem/${id}/get-all-test-cases`, 
         { withCredentials: true }
     );
@@ -93,7 +94,7 @@ export const getTestCasesByProblem = async (id) => {
 
 export const UpdateTestCase = async (id, data) => {
   try {
-    const response = await axios.put(
+    const response = await api.put(
         `${BASE_URL}/api/problem/update-test-case/${id}`, 
         data,
         { withCredentials: true }
@@ -106,7 +107,7 @@ export const UpdateTestCase = async (id, data) => {
 
 export const DeleteTestCase = async (id) => {
   try {
-    const response = await axios.delete(
+    const response = await api.delete(
         `${BASE_URL}/api/problem/delete-test-case/${id}`, 
         { withCredentials: true }
     );
@@ -117,8 +118,9 @@ export const DeleteTestCase = async (id) => {
 };
 
 export const RunTestCases = async (language, code, testCases) => {
+  console.log("Run testcases")
   try {
-    const response = await axios.post(
+    const response = await api.post(
         `${BASE_URL}/run/test-cases`, 
         {language, code, testCases},
         { withCredentials: true }
@@ -131,7 +133,7 @@ export const RunTestCases = async (language, code, testCases) => {
 
 export const RunCustomTestCase = async (language, code, testcase) => {
   try {
-    const response = await axios.post(
+    const response = await api.post(
         `${BASE_URL}/run/custom-test-case`, 
         {language, code, testcase},
         { withCredentials: true }
@@ -144,7 +146,7 @@ export const RunCustomTestCase = async (language, code, testcase) => {
 
 export const SubmitCode = async (language, code, problemId) => {
   try {
-    const response = await axios.post(
+    const response = await api.post(
         `${BASE_URL}/run/submit-code`, 
         {language, code, problemId},
         { withCredentials: true }
@@ -156,15 +158,100 @@ export const SubmitCode = async (language, code, problemId) => {
 };
 
 export const GetLeaderboardInfo = async () => {
-  console.log("called leaderboard")
   try {
-    const response = await axios.get(
+    const response = await api.get(
         `${BASE_URL}/api/user/leaderboard`, 
         { withCredentials: true }
     );
-    console.log(response.data)
     return response.data;
   } catch (error) {
     throw error.response?.data || error;
   }
 };
+
+export const ReviewCode = async (language, code) => {
+  try {
+    const response = await api.post(
+        `${BASE_URL}/run/review-code`, 
+        { language, code },
+        { withCredentials: true }
+    );
+    return response.data;
+  } catch (error) {
+    throw error.response?.data || error;
+  }
+};
+
+export const GetDashBoard = async () => {
+  try {
+    const response = await api.get(
+        `${BASE_URL}/api/user/dashboard`, 
+        { withCredentials: true }
+    );
+    return response.data;
+  } catch (error) {
+    throw error.response?.data || error;
+  }
+};
+
+export const GetAllUsers = async (pageNum, limit, search) => {
+  try {
+    const response = await api.get(
+        `${BASE_URL}/api/user/get-all/?page=${pageNum}&limit=${limit}&search=${search}`, 
+        { withCredentials: true }
+    );
+    return response.data;
+  } catch (error) {
+    throw error.response?.data || error;
+  }
+};
+
+export const GetAllSubmissions = async (pageNum, limit, search) => {
+  try {
+    const response = await api.get(
+        `${BASE_URL}/api/user/submissions/?page=${pageNum}&limit=${limit}&search=${search}`, 
+        { withCredentials: true }
+    );
+    return response.data;
+  } catch (error) {
+    throw error.response?.data || error;
+  }
+};
+
+export const GetSubmissionsUser = async () => {
+  try {
+    const response = await api.get(
+        `${BASE_URL}/api/user/submissions-user`, 
+        { withCredentials: true }
+    );
+    return response.data;
+  } catch (error) {
+    throw error.response?.data || error;
+  }
+};
+
+export const GetSubmissionsUserProblem = async (problem_id) => {
+  try {
+    const response = await api.get(
+        `${BASE_URL}/api/user/submissions-user-problem/${problem_id}`, 
+        { withCredentials: true }
+    );
+    return response.data;
+  } catch (error) {
+    throw error.response?.data || error;
+  }
+};
+
+export const getAdminDashboardStats = async () => {
+  try {
+    const response = await api.get(
+        `${BASE_URL}/api/user/admin-dashboard`, 
+        { withCredentials: true }
+    );
+    return response.data;
+  } catch (error) {
+    throw error.response?.data || error;
+  }
+};
+
+

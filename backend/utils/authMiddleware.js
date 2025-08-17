@@ -4,7 +4,9 @@ const User = require("../model/User");
 const authMiddleware = async (req, res, next) => {
   try {
     // Get token from cookies
-    const token = req.cookies?.token;
+    // const token = req.cookies?.token;
+    const authHeader = req.headers["authorization"];
+    const token = authHeader && authHeader.split(" ")[1];
 
     if (!token) {
       return res.status(401).json({
@@ -14,22 +16,12 @@ const authMiddleware = async (req, res, next) => {
     }
 
     // Verify token
-    const decoded = jwt.verify(token, process.env.SECRET_KEY);
+    jwt.verify(token, process.env.SECRET_KEY, (err, user) => {
+      if (err) return res.status(401).json({ success: false, message: "Invalid token" });
+      req.user = user;
+      next();
+    });
 
-    // Find user from payload
-    // const user = await User.findById(decoded.id).select("-password");
-
-    // if (!user) {
-    //   return res.status(401).json({
-    //     success: false,
-    //     message: "Invalid token. User not found."
-    //   });
-    // }
-
-    // Attach user to request
-    req.user = decoded;
-
-    next();
   } catch (error) {
     console.error("Auth error:", error);
     return res.status(401).json({

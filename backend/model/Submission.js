@@ -63,7 +63,8 @@ const submissionSchema = new mongoose.Schema({
     // Date and time when submission was made
     submitted_at: {
         type: Date,
-        default: Date.now
+        default: Date.now,
+        index:true,
     }
 
 }, {

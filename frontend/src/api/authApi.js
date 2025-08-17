@@ -1,5 +1,6 @@
 // src/api/authApi.js
 import axios from 'axios';
+import api from './axiosInstance';
 
 const BASE_URL = 'http://localhost:8080'; // change to backend URL
 
@@ -30,18 +31,18 @@ export const loginUser = async (credentials) => {
 // verify and get current user's info
 export const getCurrentUser = async () => {
     try {
-        const res = await axios.get(`${BASE_URL}/auth/verify`, { withCredentials: true });
+        const res = await api.get(`${BASE_URL}/auth/verify`, { withCredentials: true });
         console.log(res.data);
         return res.data; // you send back user object from backend
     } catch (error) {
-        throw error.response?.data || error;
+        return {message: error.response?.data || error, success: false} ;
     }
 };
 
 // Logout user
 export const LogoutUser = async () => {
     try {
-        const res = await axios.get(`${BASE_URL}/auth/logout`, { withCredentials: true });
+        const res = await api.get(`${BASE_URL}/auth/logout`, { withCredentials: true });
         return res.data;
     } catch (error) {
         throw error.response?.data || error;

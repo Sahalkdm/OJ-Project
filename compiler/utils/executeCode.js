@@ -1,43 +1,55 @@
-const { rejects } = require("assert");
-const { exec } = require("child_process");
-const fs = require("fs");
 const path = require("path");
+const fs = require('fs');
+const { exec } = require("child_process");
 
-const file_folder_path = path.join(__dirname, '..');
-const output_path = path.join(file_folder_path, 'outputs');
-
-if (!fs.existsSync(output_path)) {
-    fs.mkdirSync(output_path, { recursive: true });
-}
-
-const executeCode = (filepath, inputFilePath) =>{
-    const jobID = path.basename(filepath).split(".")[0];
-    const out_path = path.join(output_path, `${jobID}.exe`);
-
+const executeCode = (language, folderPath, filename, inputFilePath, timeout) => {
     return new Promise((resolve, reject) => {
-        exec(
-            `g++ ${filepath} -o ${out_path} && cd ${output_path} && .\\${jobID}.exe < ${inputFilePath}`,
-            
-            (error, stdout, stderr) => {
-                
-                if (error) {
-                    reject({error, stderr});
-                }
-                
-                if (stderr){
-                    reject(stderr);
-                }
-                
-                resolve(stdout);
-            }
-            
-        )
-    })
-}
+        const jobID = path.basename(folderPath); // UUID folder name
+        let command;
 
-module.exports = {
-    executeCode,
-}
+        switch (language) {
+            case "cpp": {
+                const outPath = path.join(folderPath, `${jobID}.exe`);
+                command = `g++ ${filename} -o ${outPath} && cd ${folderPath} && .\\${jobID}.exe < ${inputFilePath}`;
+                break;
+            }
+            case "java": {
+                // Always use Main.java for simplicity
+                command = `javac ${filename} && cd ${folderPath} && java Main < ${inputFilePath}`;
+                break;
+            }
+            case "py": {
+                command = `cd ${folderPath} && python3 ${filename} < ${inputFilePath}`;
+                break;
+            }
+            case "js": {
+                command = `cd ${folderPath} && node ${filename} < ${inputFilePath}`;
+                break;
+            }
+            default:
+                return reject(new Error("Unsupported language"));
+        }
+
+        exec(
+            command, 
+            { cwd: folderPath, timeout: timeout }, 
+            (error, stdout, stderr) => {
+            if (error) {
+                if (error.killed) {
+                    return reject({ error: "Time Limit Exceeded" });
+                }
+                return reject({ error, stderr })
+            };
+            if (stderr) return reject(stderr);
+            resolve(stdout);
+        });
+    });
+};
+
+module.exports = { executeCode };
+
+
+// `g++ ${filepath} -o ${out_path} && cd ${output_path} && .\\${jobID}.exe < ${inputFilePath}`
 
 /*
  * Helper responsible for compiling **and then executing** a C++ program that

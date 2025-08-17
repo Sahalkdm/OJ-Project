@@ -8,6 +8,7 @@ import { useEffect } from "react";
 const AddProblemPage = () => {
 
   const { problem_id } = useParams(); // id will be undefined when adding new
+  console.log(problem_id)
   const navigate = useNavigate();
 
   const [title, setTitle] = useState("");
@@ -42,8 +43,10 @@ const AddProblemPage = () => {
         }
       };
       fetchProblem();
+    }else{
+      resetForm();
     }
-  }, [problem_id]);
+  }, [problem_id,]);
 
 
   const resetForm = () => {
@@ -120,8 +123,8 @@ const AddProblemPage = () => {
   };
 
   return (
-    <div className="max-w-5xl mx-auto p-6 bg-white shadow rounded-lg my-8">
-      <h1 className="text-2xl font-bold mb-6 text-gray-800">{problem_id ? 'Update Problem' : 'Add New Problem'}</h1>
+    <div className="max-w-5xl mx-auto p-6 bg-white shadow rounded-lg my-8 dark:bg-gray-800 dark:text-gray-50">
+      <h1 className="text-2xl font-bold mb-6 text-gray-800 dark:text-gray-50">{problem_id ? 'Update Problem' : 'Add New Problem'}</h1>
       <form onSubmit={handleSubmit} className="grid grid-cols-1 gap-4">
         <TextArea label="Title" value={title} setValue={setTitle} rows={2} placeholder="Enter problem title" />
         <TextArea label="Statement" value={statement} setValue={setStatement} rows={6} placeholder="Describe the problem statement" />
@@ -132,7 +135,7 @@ const AddProblemPage = () => {
           <select
             value={difficulty}
             onChange={(e) => setDifficulty(e.target.value)}
-            className="border border-gray-300 rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="border border-gray-300 dark:border-gray-700 rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-gray-50"
           >
             <option value={"Easy"}>Easy</option>
             <option value={"Medium"}>Medium</option>
@@ -146,21 +149,21 @@ const AddProblemPage = () => {
           {sampleIO.map((sample, index) => (
             <div key={index} className="flex flex-col md:flex-row items-start gap-2 mb-3 relative">
               <textarea
-                className="flex-1 border border-gray-300 rounded-md p-2 resize-none focus:outline-none focus:ring-2 focus:ring-blue-500 w-full"
+                className="flex-1 border border-gray-300 rounded-md p-2 resize-none focus:outline-none focus:ring-2 focus:ring-blue-500 w-full dark:bg-gray-900 text-gray-800 dark:text-gray-200 dark:border-gray-700"
                 placeholder={`Sample Input ${index + 1}`}
                 value={sample.input}
                 rows={2}
                 onChange={(e) => handleSampleChange(index, "input", e.target.value)}
               />
               <textarea
-                className="flex-1 border border-gray-300 rounded-md p-2 resize-none focus:outline-none focus:ring-2 focus:ring-blue-500 w-full"
+                className="flex-1 border border-gray-300 rounded-md p-2 resize-none focus:outline-none focus:ring-2 focus:ring-blue-500 w-full dark:bg-gray-900 text-gray-800 dark:text-gray-200 dark:border-gray-700"
                 placeholder={`Sample Output ${index + 1}`}
                 value={sample.output}
                 rows={2}
                 onChange={(e) => handleSampleChange(index, "output", e.target.value)}
               />
               <textarea
-                className="flex-1 border border-gray-300 rounded-md p-2 resize-none focus:outline-none focus:ring-2 focus:ring-blue-500 w-full"
+                className="flex-1 border border-gray-300 rounded-md p-2 resize-none focus:outline-none focus:ring-2 focus:ring-blue-500 w-full dark:bg-gray-900 text-gray-800 dark:text-gray-200 dark:border-gray-700"
                 placeholder={`Explanation ${index + 1} (Optional)`}
                 value={sample.explanation}
                 rows={2}

@@ -19,8 +19,7 @@ async function runCodeOnCompiler({ code, language, input = "", timeout = 4000 })
   try {
     const response = await axios.post(
       COMPILER_URL,
-      { code, language, input },
-      { timeout }
+      { code, language, input, timeout },
     );
 
     return {
@@ -33,7 +32,7 @@ async function runCodeOnCompiler({ code, language, input = "", timeout = 4000 })
     let errorMessage = "Unknown error";
     let status = "RTE"; // Runtime Error default
 
-    if (err.code === "ECONNABORTED") {
+    if (err.code === "ECONNABORTED" || err.response?.data?.errorMessage === "Time Limit Exceeded") {
       errorMessage = "Time Limit Exceeded";
       status = "TLE";
     } else if (err.response?.data?.errorMessage) {

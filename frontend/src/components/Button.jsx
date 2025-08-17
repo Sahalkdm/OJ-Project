@@ -5,13 +5,14 @@ const variantClasses = {
   outline: "border border-gray-400 text-gray-800 hover:bg-gray-100",
   danger: "bg-red-500 text-white hover:bg-red-600",
   success: "bg-green-600 text-white hover:bg-green-700",
+  default: "",
 };
 
 export default function Button({
   children,
   onClick,
   type = "button",
-  variant = "primary",
+  variant = "defualt",
   className = "",
   disabled = false,
 }) {

@@ -157,24 +157,24 @@ function AddTestCases() {
     }
 
   return (
-    <div className="max-w-5xl mx-auto p-6 bg-white shadow rounded-lg my-8">
+    <div className="max-w-5xl mx-auto p-6 bg-white shadow rounded-lg my-8 dark:bg-gray-800 dark:text-gray-50">
         {/* Dynamic Test Cases */}
         <form className='w-full' onSubmit={handleOnSubmit}>
         <div className="mb-6">
             <div>
-                <h1 className='text-lg font-bold text-gray-800'>Title: {problem?.title}</h1>
+                <h1 className='text-2xl font-bold text-gray-800 dark:text-gray-50 text-center'>Problem - {problem?.title}</h1>
             </div>
         
-        <label className="block font-semibold text-gray-800 mb-2">Test Cases</label>
+        <label className="block font-semibold text-gray-800 my-2 text-xl dark:text-gray-50 text-center">Test Cases</label>
 
-        {existingTestCases?.length > 0 && <div className='block font-semibold text-gray-700 mb-2'>Existing Test Cases</div>}
+        {existingTestCases?.length > 0 && <div className='block font-semibold text-gray-700 mb-2 dark:text-gray-100'>Existing Test Cases</div>}
 
         {existingTestCases.length > 0 && existingTestCases.map((tc, index) => (
             <div key={index} className="flex flex-col md:flex-row gap-2 items-center mb-3 relative p-3 rounded-md shadow">
             
             {/* Input Field */}
             <textarea
-                className="flex-1 border border-gray-200 rounded-md p-2 resize-none focus:outline-none focus:ring-2 focus:ring-blue-500 w-full bg-gray-50"
+                className="flex-1 border border-gray-200 rounded-md p-2 resize-none focus:outline-none focus:ring-2 focus:ring-blue-500 w-full bg-gray-50 dark:bg-gray-900 text-gray-800 dark:text-gray-200 dark:border-gray-700"
                 placeholder={`Input ${index + 1}`}
                 value={tc.input}
                 rows={3}
@@ -183,7 +183,7 @@ function AddTestCases() {
 
             {/* Output Field */}
             <textarea
-                className="flex-1 border border-gray-200 rounded-md p-2 resize-none focus:outline-none focus:ring-2 focus:ring-blue-500 w-full bg-gray-50"
+                className="flex-1 border border-gray-200 rounded-md p-2 resize-none focus:outline-none focus:ring-2 focus:ring-blue-500 w-full bg-gray-50 dark:bg-gray-900 text-gray-800 dark:text-gray-200 dark:border-gray-700"
                 placeholder={`Output ${index + 1}`}
                 value={tc.output}
                 rows={3}
@@ -226,14 +226,14 @@ function AddTestCases() {
             </div>
         ))}
 
-        <div className='block font-semibold text-gray-700 mb-2 w-full border-t mt-10'>Add New Test Cases</div>
+        <div className='block font-semibold text-gray-700 mb-2 w-full border-t mt-10 dark:text-gray-100'>Add New Test Cases</div>
 
         {testCases.map((tc, index) => (
             <div key={index} className="flex flex-col md:flex-row gap-2 items-center mb-3 relative p-3 rounded-md shadow">
             
             {/* Input Field */}
             <textarea
-                className="flex-1 border border-gray-200 rounded-md p-2 resize-none focus:outline-none focus:ring-2 focus:ring-blue-500 w-full bg-gray-50"
+                className="flex-1 border border-gray-200 rounded-md p-2 resize-none focus:outline-none focus:ring-2 focus:ring-blue-500 w-full bg-gray-50 dark:bg-gray-900 text-gray-800 dark:text-gray-200 dark:border-gray-700"
                 placeholder={`Input ${index + 1}`}
                 value={tc.input}
                 rows={3}
@@ -242,7 +242,7 @@ function AddTestCases() {
 
             {/* Output Field */}
             <textarea
-                className="flex-1 border border-gray-200 rounded-md p-2 resize-none focus:outline-none focus:ring-2 focus:ring-blue-500 w-full bg-gray-50"
+                className="flex-1 border border-gray-200 rounded-md p-2 resize-none focus:outline-none focus:ring-2 focus:ring-blue-500 w-full bg-gray-50 dark:bg-gray-900 text-gray-800 dark:text-gray-200 dark:border-gray-700"
                 placeholder={`Output ${index + 1}`}
                 value={tc.output}
                 rows={3}

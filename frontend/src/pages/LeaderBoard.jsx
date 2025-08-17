@@ -4,8 +4,9 @@ import LeaderBoardTable from '../components/problem/LeaderBoardTable'
 function LeaderBoard() {
   return (
     <div>
-      LeaderBoard
-      <LeaderBoardTable/>
+      <div className="p-3">
+        <LeaderBoardTable/>
+      </div>
     </div>
   )
 }

@@ -1,10 +1,15 @@
 // ProtectedRoute.js
 import { Navigate, Outlet, useLocation } from "react-router-dom";
 import { useAuth } from "../hooks/AuthProvides";
+import { useDispatch, useSelector } from "react-redux";
+import { useEffect } from "react";
+import { fetchUser } from "../store/authSlice";
 
 const ProtectedRoute = () => {
-  const { user, loading } = useAuth();
+  // const { user, loading } = useAuth();
   const location = useLocation();
+
+  const { user, loading } = useSelector((state) => state.auth);
     
   if (loading) return <div>Loading...</div>; // prevent redirect before checking
 

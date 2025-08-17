@@ -3,18 +3,30 @@ const dotenv = require("dotenv");
 
 dotenv.config();
 
-const generateToken = (user) => {
+const generateAccessToken = (user) => {
   const payload = {
     id: user?._id,
     email: user?.email,
-    isAdmin: user?.isAdmin // Optional: add user type (e.g., admin, student, etc.)
+    isAdmin: user?.isAdmin
   };
 
   const options = {
-    expiresIn: "24h"
+    expiresIn: "1h"
   };
 
   return jwt.sign(payload, process.env.SECRET_KEY, options);
 };
 
-module.exports = generateToken;
+/**
+ * Generate Refresh Token
+ */
+const generateRefreshToken = (user) => {
+  const payload = { id: user._id };
+
+  return jwt.sign(payload, process.env.REFRESH_SECRET, { expiresIn: "7d" });
+};
+
+module.exports = {
+  generateAccessToken,
+  generateRefreshToken
+};
