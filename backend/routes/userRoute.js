@@ -1,6 +1,6 @@
 const { GetLeaderboard, GetDashBoard, GetAllUsers, GetAllSubmissions, GetSubmissionUser, GetSubmissionUserProblem, getAdminDashboardStats } = require("../controllers/userController");
-const authMiddleware = require("../utils/authMiddleware");
 const adminMiddleware = require("../utils/adminMiddleware");
+const { authMiddleware } = require("../utils/authMiddleware");
 
 const router = require("express").Router();
 

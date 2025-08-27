@@ -1,6 +1,6 @@
 
 const { RunTestCode, RunCustomTestCode, SubmitCode, GetReview } = require("../controllers/codeRunController");
-const authMiddleware = require("../utils/authMiddleware");
+const { authMiddleware } = require("../utils/authMiddleware");
 
 const router = require("express").Router();
 

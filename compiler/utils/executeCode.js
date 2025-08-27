@@ -11,6 +11,7 @@ const executeCode = (language, folderPath, filename, inputFilePath, timeout) => 
             case "cpp": {
                 const outPath = path.join(folderPath, `${jobID}.exe`);
                 command = `g++ ${filename} -o ${outPath} && cd ${folderPath} && .\\${jobID}.exe < ${inputFilePath}`;
+                //command = `g++ ${filename} -o ${outPath} && cd ${folderPath} && ./${jobID}.exe < ${inputFilePath}`;
                 break;
             }
             case "java": {
@@ -30,18 +31,27 @@ const executeCode = (language, folderPath, filename, inputFilePath, timeout) => 
                 return reject(new Error("Unsupported language"));
         }
 
+        // const start = process.hrtime(); // Get the high-resolution time at the start
+        // const startTime = performance.now(); // Record the starting time.
+
         exec(
             command, 
             { cwd: folderPath, timeout: timeout }, 
             (error, stdout, stderr) => {
+                // const endTime = performance.now(); // Record the ending time.
             if (error) {
                 if (error.killed) {
                     return reject({ error: "Time Limit Exceeded" });
                 }
                 return reject({ error, stderr })
             };
+            // const end = process.hrtime(start); // Get the high-resolution time at the end, relative to 'start'
             if (stderr) return reject(stderr);
             resolve(stdout);
+            // Convert the result to milliseconds for readability
+            // const milliseconds = (end[0] * 1000) + (end[1] / 1000000);
+            // console.log(`Execution time: ${milliseconds} ms`);
+            // console.log(`Execution time Perfomnace: ${endTime - startTime} milliseconds`);
         });
     });
 };

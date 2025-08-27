@@ -3,6 +3,7 @@ import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, PieChart, Pie, C
 import { GetDashBoard } from "../../api/problemApi";
 import { toast } from "react-toastify";
 import { useSelector } from "react-redux";
+import { handleError } from "../../utils/toastFunctions";
 
 const UserDashboard = () => {
 
@@ -30,15 +31,6 @@ const UserDashboard = () => {
       fetchDashboardData();
     }, [])
 
-      const handleError = (err) =>
-        toast.error(err, {
-            position: "bottom-left",
-        });
-    
-      const handleSuccess = (msg) =>
-        toast.success(msg, {
-            position: "bottom-right",
-      });
   // 1️⃣ Basic Stats
       // Single-pass calculations
     let totalSubmissions = 0;

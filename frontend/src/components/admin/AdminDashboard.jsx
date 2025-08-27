@@ -15,26 +15,7 @@ import {
   Bar
 } from "recharts";
 import { getAdminDashboardStats } from "../../api/problemApi";
-import { toast } from "react-toastify";
-
-// // Sample data (replace with your backend data)
-// const submissionsTrendData = [
-//   { date: "2025-08-01", total: 50, accepted: 20 },
-//   { date: "2025-08-02", total: 70, accepted: 35 },
-//   { date: "2025-08-03", total: 100, accepted: 50 },
-// ];
-
-// const languageData = [
-//   { name: "C++", value: 60 },
-//   { name: "Python", value: 25 },
-//   { name: "Java", value: 15 },
-// ];
-
-// const difficultyData = [
-//   { difficulty: "Easy", accepted: 40, wrong: 20 },
-//   { difficulty: "Medium", accepted: 25, wrong: 30 },
-//   { difficulty: "Hard", accepted: 10, wrong: 35 },
-// ];
+import { handleError } from "../../utils/toastFunctions";
 
 // Pie chart colors 
 const COLORS = ["#0088FE", "#00C49F", "#FFBB28", "#FF8042"];
@@ -56,7 +37,6 @@ export default function AdminDashboard() {
         const fetchAdminStats = async () => {
           try {
             const res = await getAdminDashboardStats();
-            console.log(res);
             if (res?.success) {
               setSubmissionsTrendData(res?.submissionsTrendData);
               setLanguageData(res?.languageData);
@@ -77,16 +57,6 @@ export default function AdminDashboard() {
     
         fetchAdminStats();
       }, []);
-
-      const handleError = (err) =>
-              toast.error(err, {
-                position: "bottom-left",
-              });
-          
-            const handleSuccess = (msg) =>
-              toast.success(msg, {
-                position: "bottom-right",
-              });
 
   return (
     <div className="p-4 space-y-6 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 h-full">

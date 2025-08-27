@@ -6,18 +6,22 @@ const {
     getTestCasesByProblem, 
     updateTestcase, 
     deleteTestCase,
-    GetLeaderboard,
     updateProblem,
     deleteProblem,
+    AddTags,
+    GetTags,
 } = require("../controllers/problemController");
-const adminMiddleware = require("../utils/adminMiddleware");
 
-const authMiddleware = require("../utils/authMiddleware");
+const adminMiddleware = require("../utils/adminMiddleware");
+const { authMiddleware, authMiddlewareOptional } = require("../utils/authMiddleware");
 
 const router = require("express").Router();
 
+router.post('/add-tag', authMiddleware, adminMiddleware, AddTags); // Add tags
+router.get('/tags', GetTags); // Get all tags
+
 router.post("/create", authMiddleware, adminMiddleware, createProblem);  // create problem
-router.get("/get-all", GetAllProblems); // get all problems
+router.get("/get-all", authMiddlewareOptional, GetAllProblems); // get all problems
 router.get("/:id",authMiddleware ,GetProblemById); // get a perticular problem details
 router.put('/update/:id', authMiddleware, adminMiddleware, updateProblem) // Update problem
 router.delete('/delete/:id', authMiddleware, adminMiddleware, deleteProblem) // Delete problem

@@ -1,31 +1,33 @@
 import React, { useEffect, useState } from 'react'
-import { toast } from 'react-toastify';
 import { GetSubmissionsUserProblem } from '../../api/problemApi';
+import { getUserProblemSubmissions } from '../../api/contestApi';
+import { handleError } from '../../utils/toastFunctions';
 
-function SubmissionTable({ setCode, setLanguage, problem_id }) {
+function SubmissionTable({ setCode, setLanguage, problem_id, setIsSubmission, contestId, isContest=false }) {
 
     const [submissions, setSubmissions] = useState([]);
     useEffect(()=>{
             const fetchSubmissions = async () =>{
                 try {
-                    const res = await GetSubmissionsUserProblem(problem_id);
+                    let res;
+                    if(isContest){
+                      res = await getUserProblemSubmissions(contestId, problem_id);
+                    }else{
+                      res = await GetSubmissionsUserProblem(problem_id);
+                    }
                     if (res?.success){
                         setSubmissions(res?.submissions)
                     }else{
-                        handleError(res?.message || "Error loading problem")
+                        handleError(res?.message || "Error loading data")
                     }
                 } catch (error) {
-                    handleError(error?.message || "Error loading problem")
+                    handleError(error?.message || "Error loading data")
                 }
             }
     
             fetchSubmissions();
         }, [problem_id,])
 
-    const handleError = (err) =>
-        toast.error(err, {
-            position: "bottom-left",
-    });
   return (
     <div>
       {/* Submissions Table */}
@@ -71,7 +73,7 @@ function SubmissionTable({ setCode, setLanguage, problem_id }) {
                       </td>
                       <td className="px-4 py-2 border-b dark:border-gray-700">
                         <button
-                          onClick={() => {setCode(sub.code);setLanguage(sub.language)}}
+                          onClick={() => {setCode(sub.code); setLanguage(sub.language); setIsSubmission(true)}}
                           className="px-3 py-1 text-sm rounded bg-cyan-600 text-white hover:bg-cyan-500"
                         >
                           Load

@@ -24,11 +24,10 @@ module.exports.RunCode = async (req, res) => {
         const output = await executeCode(language, folderPath, filename, 'input.txt', timeout);
 
         // 4. Cleanup after execution
-        fs.rmSync(folderPath, { recursive: true, force: true });
+        // fs.rmSync(folderPath, { recursive: true, force: true });
         res.status(201).json({success:true, message: "Code ran successfully", output})
     } catch (error) {
         let errorMessage = "";
-        console.log(error)
         if (error.stderr) {
             // Remove absolute file paths for cleaner output
             // **Change this part after dockerezing**
@@ -48,10 +47,9 @@ module.exports.RunCode = async (req, res) => {
             errorMessage
         });
     }finally{
-        console.log("final called")
         try {
             fs.rmSync(folder_path_glb, { recursive: true, force: true });
-            console.log("clear folder processing called");
+            // console.log("clear folder processing called");
         } catch (cleanupErr) {
             console.error("Cleanup failed:", cleanupErr);
         }

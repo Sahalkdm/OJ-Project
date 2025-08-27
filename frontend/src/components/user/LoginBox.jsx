@@ -1,14 +1,12 @@
 import React, { useState } from 'react'
 import Card from '../Card'
 import InputField from '../Input'
-import { FaUser, FaLock, FaFacebookF, FaTwitter, FaGoogle, FaEnvelope } from "react-icons/fa";
+import { FaLock, FaEnvelope } from "react-icons/fa";
 import Button from '../Button';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-// import { loginUser } from '../../api/authApi';
-import { ToastContainer, toast } from "react-toastify";
-import { useAuth } from '../../hooks/AuthProvides';
 import { useDispatch, useSelector } from "react-redux";
 import { login } from '../../store/authSlice';
+import { handleError, handleSuccess } from '../../utils/toastFunctions';
 
 function LoginBox() {
 
@@ -16,34 +14,20 @@ function LoginBox() {
     const location = useLocation();
     const dispatch = useDispatch();
 
-    const { loading } = useSelector((state) => state.auth);
-
     const from = location.state?.from?.pathname || "/"; // fallback to homepage
-    console.log("from: ", from)
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
+    const [loading, setLoading] = useState(false);
 
     const navigate = useNavigate();
-
-  const handleError = (err) =>
-    toast.error(err, {
-      position: "bottom-left",
-    });
-
-  const handleSuccess = (msg) =>
-    toast.success(msg, {
-      position: "bottom-right",
-    });
 
   const onSubmitHandler = async (e) =>{
     e.preventDefault();
     const data = {email, password};
-
+    setLoading(true);
     try{
       // const response = await loginUser(data);
       const resultAction = await dispatch(login(data));
-
-      console.log(resultAction)
 
       if (login.fulfilled.match(resultAction)) {
         handleSuccess(resultAction.payload.message);
@@ -80,18 +64,20 @@ function LoginBox() {
       // }
 
     }catch(error){
-      console.log("error: ", error)
       handleError(error?.message || "Something went wrong!");
+    }finally{
+      setLoading(false);
     }
   }
 
   return (
-    <Card className='dark:bg-gray-700 dark:text-gray-100'>
+    <Card className='dark:bg-gradient-to-br from-gray-900 via-gray-800 to-black dark:text-gray-100 dark:shadow-gray-800'>
         <div className="flex w-full md:min-h-[50vh] md:flex-row flex-col ">
             <div className='md:w-1/2'>
                 <img src='oj-login-img1.jpg' width={'100%'} className='md:h-full h-40'/>
             </div>
             <div className='md:w-1/2 flex flex-col justify-center items-center space-y-4 pl-3'>
+                <img src='/myCoddyLogo.png' alt='myCoddy' width={100} height={30}/>
                 <h2 className='text-xl font-bold text-gray-800 dark:text-gray-50 pb-4'>Sign In</h2>
                 <form className='w-full' onSubmit={onSubmitHandler}>
                     <div className='w-full p-2'>
@@ -99,7 +85,7 @@ function LoginBox() {
                         <InputField type='password' placeholder={'Password'} icon={FaLock} value={password} setValue={setPassword}/>
                     </div>
                     <div className='text-center'>
-                        <Button type='submit' className='dark:bg-violet-600'>Sign In</Button>
+                        <Button disabled={loading} type='submit' className='dark:bg-violet-600'>{loading ? "Signing In..." : "Sign In"}</Button>
                     </div>
                 </form>
                 <div className='text-xs text-right w-full text-gray-500 dark:text-gray-300'>

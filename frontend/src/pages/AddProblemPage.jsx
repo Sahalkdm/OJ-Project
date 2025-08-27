@@ -4,11 +4,15 @@ import { createProblem, GetProblemById, UpdateProblem } from "../api/problemApi"
 import { Navigate, useNavigate, useParams } from "react-router-dom";
 import { ToastContainer, toast } from "react-toastify";
 import { useEffect } from "react";
+import { useSelector } from "react-redux";
+import MultiSelect from "../components/MultiSelect";
+import { handleError, handleSuccess } from "../utils/toastFunctions";
 
 const AddProblemPage = () => {
 
+  const tags = useSelector(state=>state.tags.list);
+
   const { problem_id } = useParams(); // id will be undefined when adding new
-  console.log(problem_id)
   const navigate = useNavigate();
 
   const [title, setTitle] = useState("");
@@ -20,6 +24,8 @@ const AddProblemPage = () => {
   const [constraints, setConstraints] = useState("");
   const [inputFormat, setInputFormat] = useState("");
   const [outputFormat, setOutputFormat] = useState("");
+  const [selectedTags, setSelectedTags] = useState([]);
+  const [isPublic, setIsPublic] = useState(true);
 
   useEffect(() => {
     if (problem_id) {
@@ -35,6 +41,8 @@ const AddProblemPage = () => {
             setConstraints(problem.constraints);
             setInputFormat(problem.input_format);
             setOutputFormat(problem.output_format);
+            setSelectedTags(problem?.tags)
+            setIsPublic(problem?.isPublic || false);
           }else{
             handleError(message);
           }
@@ -57,6 +65,8 @@ const AddProblemPage = () => {
     setConstraints("");
     setInputFormat("");
     setOutputFormat("");
+    setSelectedTags([]);
+    setIsPublic(true);
   };
 
   const handleSampleChange = (index, field, value) => {
@@ -75,16 +85,6 @@ const AddProblemPage = () => {
     setSampleIO(updated);
   };
 
-    const handleError = (err) =>
-      toast.error(err, {
-        position: "bottom-left",
-      });
-  
-    const handleSuccess = (msg) =>
-      toast.success(msg, {
-        position: "bottom-right",
-      });
-
   const handleSubmit = async (e) => {
     e.preventDefault();
     const problem = {
@@ -95,8 +95,9 @@ const AddProblemPage = () => {
       constraints,
       input_format: inputFormat,
       output_format: outputFormat,
+      tags: selectedTags,
+      isPublic,
     };
-    console.log("Submitted Problem:", problem);
     try {
       
       let res;
@@ -118,9 +119,12 @@ const AddProblemPage = () => {
         handleError(message)
       }
     } catch (error) {
-      console.log(error)
+      handleError("Error submitting problem!")
     }
   };
+
+  // Before passing to MultiSelect
+  const options = tags.map(op => op.short_form || op.name);
 
   return (
     <div className="max-w-5xl mx-auto p-6 bg-white shadow rounded-lg my-8 dark:bg-gray-800 dark:text-gray-50">
@@ -143,27 +147,40 @@ const AddProblemPage = () => {
           </select>
         </div>
 
+        {options?.length > 0 && <MultiSelect selected={selectedTags} setSelected={setSelectedTags} options={options}/>}
+
         {/* Dynamic Input/Output Pairs */}
         <div className="mb-4">
           <label className="block font-semibold text-gray-800 mb-2">Sample Inputs & Outputs</label>
           {sampleIO.map((sample, index) => (
             <div key={index} className="flex flex-col md:flex-row items-start gap-2 mb-3 relative">
               <textarea
-                className="flex-1 border border-gray-300 rounded-md p-2 resize-none focus:outline-none focus:ring-2 focus:ring-blue-500 w-full dark:bg-gray-900 text-gray-800 dark:text-gray-200 dark:border-gray-700"
+                className="flex-1 border border-gray-300 rounded-md p-2 resize-none 
+                          focus:outline-none focus:ring-2 focus:ring-blue-500 w-full
+                          dark:bg-gray-900 text-gray-800 dark:text-gray-200 dark:border-gray-700
+                          font-mono whitespace-pre"
                 placeholder={`Sample Input ${index + 1}`}
                 value={sample.input}
                 rows={2}
                 onChange={(e) => handleSampleChange(index, "input", e.target.value)}
               />
+
               <textarea
-                className="flex-1 border border-gray-300 rounded-md p-2 resize-none focus:outline-none focus:ring-2 focus:ring-blue-500 w-full dark:bg-gray-900 text-gray-800 dark:text-gray-200 dark:border-gray-700"
+                className="flex-1 border border-gray-300 rounded-md p-2 resize-none 
+                          focus:outline-none focus:ring-2 focus:ring-blue-500 w-full
+                          dark:bg-gray-900 text-gray-800 dark:text-gray-200 dark:border-gray-700
+                          font-mono whitespace-pre"
                 placeholder={`Sample Output ${index + 1}`}
                 value={sample.output}
                 rows={2}
                 onChange={(e) => handleSampleChange(index, "output", e.target.value)}
               />
+
               <textarea
-                className="flex-1 border border-gray-300 rounded-md p-2 resize-none focus:outline-none focus:ring-2 focus:ring-blue-500 w-full dark:bg-gray-900 text-gray-800 dark:text-gray-200 dark:border-gray-700"
+                className="flex-1 border border-gray-300 rounded-md p-2 resize-none 
+                          focus:outline-none focus:ring-2 focus:ring-blue-500 w-full
+                          dark:bg-gray-900 text-gray-800 dark:text-gray-200 dark:border-gray-700
+                          font-mono whitespace-pre"
                 placeholder={`Explanation ${index + 1} (Optional)`}
                 value={sample.explanation}
                 rows={2}
@@ -196,12 +213,32 @@ const AddProblemPage = () => {
         <TextArea label="Input Format" value={inputFormat} setValue={setInputFormat} rows={3} placeholder="Explain input format here" />
         <TextArea label="Output Format" value={outputFormat} setValue={setOutputFormat} rows={3} placeholder="Explain output format here" />
 
+        <div className="grid gap-2 w-80">
+          <span className="text-sm font-medium text-gray-700 dark:text-gray-200">Visibility</span>
+          <div className="flex items-center justify-between rounded-xl border border-gray-300 bg-gray-50 p-2 dark:border-gray-700 dark:bg-gray-800">
+            <div>
+              <p className="text-sm font-medium">Make question public</p>
+              <p className="text-xs text-gray-500 dark:text-gray-400">Hide or display question for users</p>
+            </div>
+            <label className="relative inline-flex cursor-pointer items-center">
+              <input
+                type="checkbox"
+                className="peer sr-only"
+                checked={isPublic}
+                onChange={(e) => setIsPublic(e.target.checked)}
+              />
+              <div className="peer h-6 w-11 rounded-full bg-gray-300 after:absolute after:left-0.5 after:top-0.5 after:h-5 after:w-5 after:rounded-full after:bg-white after:transition-all peer-checked:bg-blue-600 peer-checked:after:translate-x-5 dark:bg-gray-600 dark:after:bg-gray-100" />
+            </label>
+          </div>
+        </div>
+
         <button
           type="submit"
           className="mt-4 w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded"
         >
           {problem_id ? 'Update Problem' : 'Submit Problem'}
         </button>
+
       </form>
       <ToastContainer />
     </div>

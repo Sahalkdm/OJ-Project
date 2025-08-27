@@ -5,8 +5,7 @@ import {
   PanelResizeHandle,
 } from 'react-resizable-panels';
 import { GetProblemById, ReviewCode, RunCustomTestCase, RunTestCases, SubmitCode } from '../../api/problemApi';
-import { ToastContainer, toast } from "react-toastify";
-import { useParams } from 'react-router-dom';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 import { useState } from 'react';
 import { CustomResizeHandle } from '../PanelResizeHandler';
 import Editor from '@monaco-editor/react';
@@ -17,28 +16,23 @@ import CodeReviewDisplay from './ReviewDisplay';
 import { useDraft } from '../../hooks/useDraft';
 import ProblemDescription from './ProblemDescription';
 import SubmissionTable from './SubmissionTable';
+import { handleError, handleSuccess } from '../../utils/toastFunctions';
+import ContestTimer from '../contets/ContestTimer';
+import { FaArrowLeft } from "react-icons/fa";
+import { exitContest, submitContestCode } from '../../api/contestApi';
+import { useDispatch, useSelector } from 'react-redux';
+import { setLanguageGlobal } from '../../store/themeSlice';
 
-export default function ProblemDisplay() {
-
+export default function ProblemDisplay({isContest, contest, joinTime, handleUpdateScoreStatus}) {
     const { problem_id } = useParams();
+    const navigate = useNavigate();
+    const dispatch = useDispatch();
+
+    const {language:globalLanguage} = useSelector(state=>state?.theme);
 
     const [problem, setProblem] = useState(null);
-    const [language, setLanguage] = useState('cpp');
-    const [code, setCode] = useState(`#include <iostream> // Required for input/output operations
-
-int main() {
-    // Declare two integer variables to store the input numbers
-    int num1, num2; 
-
-    std::cin >> num1 >> num2; 
-
-    int sum = num1 + num2; 
-
-    // Display the sum
-    std::cout << sum << std::endl; 
-
-    return 0; // Indicate successful program execution
-}`);
+    const [language, setLanguage] = useState(globalLanguage || 'cpp');
+    const [code, setCode] = useState('');
     const [customInput, setCustomInput] = useState("");
     const [output, setOutput] = useState([]);
     const [submissionResult, setSubmissionResult] = useState([]);
@@ -49,6 +43,7 @@ int main() {
     const [activeTabTop, setActiveTabTop] = useState("description"); // "description" | "submissions"
     const [reviewData, setReviewData] = useState(null);
     const [isEdited, setIsEdited] = useState(false);
+    const [isSubmission, setIsSubmission] = useState(false);
     const [buttonLoadings, setButtonLoadings] = useState({run:false, submit:false, custom:false, review:false})
 
     const { code: initialDraft, saveDraft, clearDraft, loading } = useDraft({ problemId:problem_id, language });
@@ -57,10 +52,10 @@ int main() {
       py:"print('hello world!')",
       java: `import java.util.*;
 import java.io.*;
-
+// class should be Main
 public class Main {
     public static void main(String[] args) throws Exception {
-        // class should be Main
+        // Type your code here...
     }
 }`,
       cpp:`#include <iostream>
@@ -86,39 +81,34 @@ int main() {
         }
 
         fetchProblem();
-    }, [])
+    }, []);
 
-    useEffect(()=>{
+    function handleLanguageSelection (val){
+      setLanguage(val);
       setIsEdited(false);
-    },[language]);
+      setIsSubmission(false);
+      dispatch(setLanguageGlobal(val))
+    }
 
     // Set initial draft to code state once loaded
   useEffect(() => {
+    if (loading || isSubmission) return; // ⬅️ stop overwriting if submission is being loaded
     let initCode;
-    if (isEdited){
-      initCode = "";
-    }else{
-      initCode = initialCode[language];
-    }
-    if (!loading) {
-      setCode(initialDraft || initCode);
-    };
-  }, [initialDraft, loading, language]);
-    
-    const handleError = (err) =>
-    toast.error(err, {
-        position: "bottom-left",
-    });
-
-    const handleSuccess = (msg) =>
-      toast.success(msg, {
-          position: "bottom-right",
-    });
+      if (isEdited){
+        initCode = "";
+      }else{
+        initCode = initialCode[language];
+      }
+      if (!loading) {
+        setCode(initialDraft || initCode);
+      };
+  }, [initialDraft, loading, isEdited, isSubmission, language]);
 
     const handleEditorChange = (newCode) => {
       setCode(newCode);   // update local state
       saveDraft(newCode); // throttled save to IndexedDB
       setIsEdited(true);
+      setIsSubmission(false);
     };
 
       const handleRunCodeCustom = async () => {
@@ -126,7 +116,6 @@ int main() {
         try {
             const res = await RunCustomTestCase(language, code, customInput);
             const { success, message, output, error } = res;
-            console.log(res);
             setCustomOutput(res);
             if (success){
               handleSuccess(message);
@@ -134,7 +123,6 @@ int main() {
               handleError(message);
             }
         } catch (error) {
-            console.log(error);
             handleError(error?.message || "Error running the code");
         }finally{
           setButtonLoadings({...buttonLoadings, custom:false})
@@ -146,7 +134,6 @@ int main() {
         try {
             const res = await RunTestCases(language, code, problem?.examples);
             const { success, message, output } = res;
-            console.log(res);
             if (success){
               handleSuccess(message);
               setOutput(output);
@@ -154,7 +141,6 @@ int main() {
               handleError(message);
             }
         } catch (error) {
-            console.log(error);
             setRunError(error?.output || "Error");
             setOutput(error?.output);
             handleError(error?.message || "Error running the code");
@@ -166,9 +152,15 @@ int main() {
     const handleSubmitCode = async () => {
       setButtonLoadings({...buttonLoadings, submit:true})
         try {
-            const res = await SubmitCode(language, code, problem?._id);
+            let res;
+            if (isContest){
+              res = await submitContestCode({language, code, problemId:problem?._id, contestId:contest?._id});
+              if (res.success) handleUpdateScoreStatus(problem?._id, res.score);
+            }else{
+              res = await SubmitCode(language, code, problem?._id);
+            }
+            
             const { success, message, output, score } = res;
-            console.log(res);
             if (success){
               handleSuccess(message);
               setSubmissionResult(output);
@@ -178,7 +170,6 @@ int main() {
               handleError(message);
             }
         } catch (error) {
-            console.log(error);
             setRunError(error?.output || "Error");
             setOutput(error?.output);
             handleError(error?.message || "Error running the code");
@@ -192,7 +183,6 @@ int main() {
         try {
             const res = await ReviewCode(language, code);
             const { success, message, review } = res;
-            console.log(res);
             if (success){
               setReviewData(review);
             }else{
@@ -209,12 +199,27 @@ int main() {
         return <div>Problem Not Loaded</div>
     }
 
+    async function handleContestExit(){
+      try {
+        const res = await exitContest(contest?._id);
+        if (res.success) {
+          handleSuccess(res.message);
+          navigate('/');
+        }else{
+          handleError(res.message);
+          navigate(`/contest/${contest?._id}`)
+        }
+      } catch (error) {
+        handleError(error?.message || "Please try again later!")
+      }
+    }
   return (
     <PanelGroup direction="horizontal">
       <Panel defaultSize={50} minSize={30} order={1}>
   <div className="px-6 py-3 space-y-6 overflow-y-auto h-full">
     {/* Top Tab Bar */}
-      <div className="flex border-b border-gray-300 dark:border-gray-700 mb-4">
+      <div className="flex justify-between border-b border-gray-300 dark:border-gray-700 mb-4">
+        <div className="flex">
         <button
           onClick={() => setActiveTabTop("description")}
           className={`px-4 py-2 font-medium ${
@@ -235,11 +240,15 @@ int main() {
         >
           Submissions
         </button>
+        </div>
+        {isContest && <div className='text-gray-700 dark:text-gray-200 border-2 dark:border-gray-600 py-1 px-3 h-fit rounded-md shadow hover:bg-gray-100 dark:hover:bg-gray-700'>
+          <Link to={`/contest/${contest?._id}`} className='flex items-center gap-1'><FaArrowLeft/> Go to Problems</Link>
+        </div>}
       </div>
       {activeTabTop === 'description' ? 
         <ProblemDescription problem={problem}/>
         :
-        <SubmissionTable problem_id={problem_id} setCode={setCode} setLanguage={setLanguage}/>
+        <SubmissionTable problem_id={problem_id} setLanguage={setLanguage} setCode={setCode} setIsSubmission={setIsSubmission} isContest={isContest} contestId={contest?._id}/>
       }
       
   </div>
@@ -253,8 +262,11 @@ int main() {
             <Panel defaultSize={60} minSize={30} order={1}>
               {/* Code editor */}
               <div className='h-full flex flex-col gap-1 overflow-auto'>
-              <div className='flex justify-end'>
-                <LanguageDropdown selected={language} setSelected={setLanguage}/> 
+              <div className='flex justify-between flex-row-reverse'>
+                <LanguageDropdown selected={language} onLanguageSelection={handleLanguageSelection}/> 
+                {isContest && <div>
+                  <ContestTimer endTime={contest?.end_time} startTime={joinTime} duration={contest?.duration*60} onExit={handleContestExit}/>
+                </div>}
               </div>
               
               <div className='flex-1 overflow-hidden rounded-md h-full border p-1'>
@@ -262,7 +274,7 @@ int main() {
                   value={code} 
                   onChange={(val)=>handleEditorChange(val)}
                   theme="vs-dark"
-                  defaultLanguage={'cpp'}
+                  defaultLanguage={language === 'py' ? 'python' : language}
                   language={language === 'py' ? 'python' : language}
                   height={'100%'}
                   options={{
@@ -286,7 +298,7 @@ int main() {
               <div className="border-gray-300 dark:border-gray-700 h-full flex flex-col gap-2">
                 {/* Tabs */}
                 <div className="flex border-b border-gray-300 dark:border-gray-700">
-                  {["run", "custom", "submit", "AIReview"].map(tab => (
+                  {(isContest? ["run", "custom", "submit"] : ["run", "custom", "submit", "AIReview"]).map(tab => (
                     <button
                       key={tab}
                       onClick={() => setActiveTab(tab)}

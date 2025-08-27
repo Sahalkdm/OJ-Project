@@ -1,6 +1,6 @@
 const axios = require("axios");
 
-const COMPILER_URL = process.env.COMPILER_URL || "http://localhost:8000/run/code";
+const COMPILER_URL = process.env.COMPILER_URL+"/run/code" || "http://localhost:8000/run/code";
 
 /**
  * Executes code on the compiler service and returns standardized results.

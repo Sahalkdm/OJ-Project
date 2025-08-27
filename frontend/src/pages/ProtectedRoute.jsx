@@ -4,6 +4,7 @@ import { useAuth } from "../hooks/AuthProvides";
 import { useDispatch, useSelector } from "react-redux";
 import { useEffect } from "react";
 import { fetchUser } from "../store/authSlice";
+import LoadingPage from "./LoadingPage";
 
 const ProtectedRoute = () => {
   // const { user, loading } = useAuth();
@@ -11,7 +12,7 @@ const ProtectedRoute = () => {
 
   const { user, loading } = useSelector((state) => state.auth);
     
-  if (loading) return <div>Loading...</div>; // prevent redirect before checking
+  if (loading) return <LoadingPage/>; // prevent redirect before checking
 
   return user ? <Outlet /> : <Navigate to="/login" state={{ from: location }} replace />;
 

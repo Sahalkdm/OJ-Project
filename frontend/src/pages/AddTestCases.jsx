@@ -1,11 +1,10 @@
 import React from 'react'
-import Card from '../components/Card'
 import { useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useEffect } from 'react';
-import { ToastContainer, toast } from "react-toastify";
 import { DeleteTestCase, GetProblemById, getTestCasesByProblem, SaveTestCases, UpdateTestCase } from '../api/problemApi';
 import Button from '../components/Button';
+import { handleError, handleSuccess } from '../utils/toastFunctions';
 
 function AddTestCases() {
 
@@ -48,16 +47,6 @@ function AddTestCases() {
         fetchProblem();
         fetchProblemTestCases();
     },[]);
-
-    const handleError = (err) =>
-        toast.error(err, {
-            position: "bottom-left",
-        });
-    
-        const handleSuccess = (msg) =>
-        toast.success(msg, {
-            position: "bottom-right",
-        });
 
     const handleTestCaseChange = (index, field, value, type='new') => {
         if (type === 'new'){
@@ -112,7 +101,6 @@ function AddTestCases() {
                 handleError(message);
             }
         } catch (error) {
-            console.log(error)
             handleError(error?.message || "Error submitting test cases")
         }
 

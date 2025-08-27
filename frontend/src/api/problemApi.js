@@ -2,7 +2,7 @@
 import axios from 'axios';
 import api from './axiosInstance';
 
-const BASE_URL = 'http://localhost:8080'; // change to backend URL
+const BASE_URL = import.meta.env.VITE_BACKEND_URL; // change to backend URL
 
 // Register
 export const createProblem = async (data) => {
@@ -118,7 +118,6 @@ export const DeleteTestCase = async (id) => {
 };
 
 export const RunTestCases = async (language, code, testCases) => {
-  console.log("Run testcases")
   try {
     const response = await api.post(
         `${BASE_URL}/run/test-cases`, 
@@ -255,3 +254,27 @@ export const getAdminDashboardStats = async () => {
 };
 
 
+export const CreateTag = async (data) => {
+  try {
+    const response = await api.post(
+        `${BASE_URL}/api/problem/add-tag`, 
+        data,
+        { withCredentials: true }
+    );
+    return response.data;
+  } catch (error) {
+    throw error.response?.data || error;
+  }
+};
+
+export const GetAllTags = async () => {
+  try {
+    const response = await axios.get(
+        `${BASE_URL}/api/problem/tags`, 
+        { withCredentials: true }
+    );
+    return response.data;
+  } catch (error) {
+    throw error.response?.data || error;
+  }
+};

@@ -1,12 +1,12 @@
 import React from 'react'
 import { motion } from "framer-motion";
-import { IoSparklesOutline } from "react-icons/io5";
+import { IoSparklesOutline, IoTrophyOutline } from "react-icons/io5";
 import { PiRocketLaunchBold } from "react-icons/pi";
 import { FaCode } from "react-icons/fa";
 import { IoAnalyticsOutline } from "react-icons/io5";
 import Button from "../components/Button";
-import WaveBackground from '../components/WaveBackground';
 import { Link } from 'react-router-dom';
+import Banner from './contest/ContestModal';
 
 function Home() {
   return (
@@ -44,7 +44,7 @@ function Home() {
           <Link to={'/problems'}><Button
             variant="default"
             className="flex gap-2 items-center justify-center rounded-2xl 
-                      border border-gray-100 text-gray-100 hover:bg-gray-500 hover:text-white 
+                      border border-cyan-400 text-cyan-400 hover:bg-cyan-500 hover:text-white 
                       px-6 py-3 font-semibold transition-colors"
           >
             <FaCode className="w-5 h-5" /> 
@@ -54,7 +54,7 @@ function Home() {
       </motion.div>
 
       {/* Floating Cards / Features */}
-      <div className="mt-20 grid md:grid-cols-3 gap-6 w-full max-w-5xl px-4">
+      <div className="mt-20 grid md:grid-cols-2 lg:grid-cols-4 gap-6 w-full px-4">
         {[
           {
             title: "Code Challenges",
@@ -76,6 +76,11 @@ function Home() {
           //   desc: "Join other coders, share solutions, and grow together.",
           //   icon: <IoSparklesOutline className="w-8 h-8 text-yellow-400" />,
           // },
+          {
+            title: "Contests",
+            desc: "Participate in contests, compete with peers, and improve your skills.",
+            icon: <IoTrophyOutline className="w-8 h-8 text-green-500" />, 
+          },
         ].map((card, idx) => (
           <motion.div
             key={idx}
@@ -89,6 +94,7 @@ function Home() {
           </motion.div>
         ))}
       </div>
+      {/* <Banner/> */}
     </div>
   )
 }

@@ -22,11 +22,28 @@ import AdminLayout from './pages/AdminLayout'
 import Users from './pages/Users'
 import Submissions from './pages/Submissions'
 import AdminDashboard from './pages/AdminDashboard'
+import AddTagForm from './pages/AddTag'
+import { fetchTags } from './store/tagsSlice'
+import LoadingPage from './pages/LoadingPage'
+import AddContest from './pages/contest/AddContest'
+import ContestLayout from './pages/contest/ContestLayout'
+import ContestInfo from './pages/contest/ContestInfo'
+import ContestLeaderboard from './pages/contest/ContestLeaderboard'
+import ContestAnalytics from './pages/contest/ContestAnalytics'
+import ContestRegistrations from './pages/contest/ContestRegistrations'
+import QuestionMapping from './pages/contest/QuestionMapping'
+import ContestTable from './pages/contest/ContestsTable'
+import ContestPage from './pages/contest/ContestDisplay'
+import ContestCodingPage from './pages/contest/ContestCodingPage'
+import ContestConductionLayout from './pages/contest/ContestConductionLayout'
+import ContestSubmissions from './pages/contest/ContestSubmissions'
+import { ToastContainer } from 'react-toastify'
 
 function App() {
 
-  const user = useSelector(state => state.auth?.user);
+  const {user, loading} = useSelector(state => state.auth);
   const theme = useSelector((state) => state.theme.theme); // light | dark
+  //const {latestContest, loading:loadingContest} = useSelector(state => state.contest);
 
   useEffect(() => {
     const root = window.document.documentElement;
@@ -45,6 +62,12 @@ function App() {
     }
   }, [dispatch, user]);
 
+  useEffect(() => {
+      dispatch(fetchTags());
+  }, [dispatch]);
+
+  if (loading) return <LoadingPage/>;
+
   return (
     <BrowserRouter>
       <Routes>
@@ -57,10 +80,22 @@ function App() {
               <Route index element={<AdminDashboard/>}/>
               <Route path='add-problem' element={<AddProblemPage/>}/>
               <Route path='users' element={<Users/>}/>
+              <Route path='add-tag' element={<AddTagForm/>}/>
               <Route path='submissions' element={<Submissions/>}/>
               <Route path='add-problem/:problem_id' element={<AddProblemPage/>}/>
               <Route path='add-testcases/:problem_id' element={<AddTestCases/>}/>
+              <Route path='manage-contest' element={<AddContest/>}/>
+              <Route path='manage-contest/:id' element={<AddContest/>}/>
+              <Route path='contests' element={<ContestTable/>}/>
               <Route path="*" element={<NoPage />} />
+              <Route path="contests/:contestId/" element={<ContestLayout />}>
+                <Route index element={<ContestInfo />} />
+                <Route path="leaderboard" element={<ContestLeaderboard />} />
+                <Route path="analysis" element={<ContestAnalytics />} />
+                <Route path="registrations" element={<ContestRegistrations />} />
+                <Route path="questions" element={<QuestionMapping />} />
+                <Route path="submissions" element={<ContestSubmissions />} />
+              </Route>
             </Route>
           </Route>
           <Route path='problems' element={<ProblemList/>}/>
@@ -68,10 +103,18 @@ function App() {
             <Route path='/problem/:problem_id' element={<CodePage/>}/>
             <Route path='/leaderboard' element={<LeaderBoard/>}/>
             <Route path='/dashboard' element={<UserAnalysisPage/>}/>
+            <Route path='/contests' element={<ContestTable/>}/>
           </Route>
           <Route path="*" element={<NoPage />} />
         </Route>
+        <Route element={<ProtectedRoute/>}>
+          <Route path='contest/:contestId' element={<ContestConductionLayout/>}> 
+            <Route index element={<ContestPage/>}/>
+            <Route path='problem/:problem_id' element={<ContestCodingPage/>}/>
+          </Route>
+        </Route>
       </Routes>
+       <ToastContainer/>
     </BrowserRouter>
   )
 }

@@ -2,7 +2,8 @@ import React from 'react'
 import { useEffect } from 'react';
 import { useState } from 'react';
 import { GetAllSubmissions } from '../../api/problemApi';
-import { toast } from "react-toastify";
+import { handleError } from '../../utils/toastFunctions';
+import { CgSearch } from 'react-icons/cg';
 
 function SubmissionsList() {
 
@@ -13,13 +14,12 @@ function SubmissionsList() {
     const [loading, setLoading] = useState(false);
     const [search, setSearch] = useState('');
 
-    const limit = 15; // rows per page
+    const limit = 50; // rows per page
 
     const fetchSubmissions = async () =>{
         setLoading(true);
         try {
             const res = await GetAllSubmissions(page, limit, search);
-            console.log(res)
             if (res?.success){
                 setSubmissions(res?.submissions);
                 setTotalPages(res?.totalPages);
@@ -40,17 +40,7 @@ function SubmissionsList() {
         }, 500); // 300ms debounce
 
         return () => clearTimeout(delay); // cancel if still typing
-    }, [page, search, ])
-
-      const handleError = (err) =>
-        toast.error(err, {
-          position: "bottom-left",
-        });
-    
-      const handleSuccess = (msg) =>
-        toast.success(msg, {
-          position: "bottom-right",
-        });
+    }, [page, search, ]);
 
     const handleSearchChange = (e) => {
         setSearch(e.target.value);
@@ -74,23 +64,10 @@ function SubmissionsList() {
                     placeholder="Search Names..."
                 />
                 <button
-                    className="absolute h-8 w-8 right-1 top-1 my-auto px-2 flex items-center bg-white rounded"
-                    type="button"
+                  className="absolute text-gray-400 right-1 top-0.5 h-full px-2 bg-transparent rounded"
+                  type="button"
                 >
-                    <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    strokeWidth="3"
-                    stroke="currentColor"
-                    className="w-8 h-8 text-slate-600"
-                    >
-                    <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z"
-                    />
-                    </svg>
+                  <CgSearch className="w-6 h-6 my-auto"/>
                 </button>
                 </div>
             </div>
@@ -142,7 +119,7 @@ function SubmissionsList() {
       {/* Pagination */}
       <div className="flex justify-between items-center px-4 py-3">
         <div className="text-sm text-slate-500">
-          Showing <b>{totalSubmissions}</b> of {limit * totalPages}
+          Showing <b>{submissions?.length}</b> of {totalSubmissions}
         </div>
         <div className="flex space-x-1">
           <button

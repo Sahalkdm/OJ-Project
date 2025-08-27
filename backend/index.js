@@ -8,6 +8,7 @@ const authRoute = require("./routes/authRoute")
 const problemRoute = require("./routes/problemRoute")
 const codeRunRoute = require("./routes/codeRunRoute")
 const userRoute = require("./routes/userRoute")
+const contestRoute = require("./routes/contestRoute")
 const { DBConnection } = require("./config/db")
 
 dotenv.config();
@@ -17,8 +18,21 @@ const PORT = process.env.PORT || 8080;
 
 DBConnection();
 
+const allowedOrigins = [
+  "http://localhost:5173",   // local frontend
+  "https://mycoddy.xyz",  // deployed frontend
+];
+
 app.use(cors({
-    origin: true,
+    origin: function (origin, callback) {
+      // allow requests with no origin (like Postman or curl)
+      if (!origin) return callback(null, true);
+      if (allowedOrigins.includes(origin)) {
+        return callback(null, true);
+      } else {
+        return callback(new Error("Not allowed by CORS"));
+      }
+    },
     credentials: true
 }));
 
@@ -32,6 +46,7 @@ app.use("/auth", authRoute);
 app.use("/api/problem", problemRoute);
 app.use("/api/user", userRoute);
 app.use('/run', codeRunRoute);
+app.use('/api/contest', contestRoute);
 
 app.get("/", (req, res)=>{
     res.status(200).json({

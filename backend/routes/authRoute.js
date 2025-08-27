@@ -1,5 +1,5 @@
 const { Signup, Login, Logout, UserVerification, refreshToken } = require("../controllers/authController");
-const authMiddleware = require("../utils/authMiddleware");
+const { authMiddleware } = require("../utils/authMiddleware");
 
 const router = require("express").Router();
 

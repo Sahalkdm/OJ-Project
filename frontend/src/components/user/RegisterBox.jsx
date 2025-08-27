@@ -1,11 +1,11 @@
 import React, { useState } from 'react'
 import Card from '../Card'
 import InputField from '../Input'
-import { FaUser, FaLock, FaPhone, FaEnvelope, FaFacebookF, FaTwitter, FaGoogle } from "react-icons/fa";
+import { FaUser, FaLock, FaPhone, FaEnvelope } from "react-icons/fa";
 import Button from '../Button';
 import { registerUser } from '../../api/authApi';
-import { ToastContainer, toast } from "react-toastify";
 import { Link, useNavigate } from 'react-router-dom';
+import { handleError, handleSuccess } from '../../utils/toastFunctions';
 
 function RegisterBox() {
 
@@ -15,44 +15,40 @@ function RegisterBox() {
   const [phone, setPhone] = useState('');
   const [password, setPassword] = useState('');
   const [cnfPassword, setCnfPassword] = useState('');
+  const [loading, setLoading] = useState(false);
 
   const navigate = useNavigate();
-
-  const handleError = (err) =>
-    toast.error(err, {
-      position: "bottom-left",
-    });
-
-  const handleSuccess = (msg) =>
-    toast.success(msg, {
-      position: "bottom-right",
-    });
 
   const onSubmitHandler = async (e) =>{
     e.preventDefault();
     const data = {firstname, lastname, email, phone, password};
-
+    setLoading(true);
     try{
       const response = await registerUser(data);
-      console.log(response);
+      if (response.success){
+        setFirstname('');
+        setLastname('');
+        setEmail('');
+        setPassword('');
+        setCnfPassword('');
+        setPhone('');
 
-      setFirstname('');
-      setLastname('');
-      setEmail('');
-      setPassword('');
-      setCnfPassword('');
-      setPhone('');
-
-      navigate('/login');
+        handleSuccess(response.message)
+        navigate('/login');
+      }else{
+        handleError(response.message)
+      }
     }catch(error){
-      console.log("error: ", error)
+      handleError(error?.message || "Error while registering, Please try again later")
+    }finally{
+      setLoading(false);
     }
-    
   }
 
   return (
-    <Card className='h-fit w-full dark:bg-gray-700 dark:text-gray-100'>
+    <Card className='h-fit w-full dark:bg-gradient-to-br from-gray-900 via-gray-800 to-black dark:text-gray-100 dark:shadow-gray-700'>
         <div className="flex w-full flex-col items-center min-w-md">
+                <img src='/myCoddyLogo.png' alt='myCoddy' width={100} height={30}/>
                 <h2 className='text-xl font-bold text-gray-800 dark:text-gray-50 p-4'>Register</h2>
                 <form className='w-full' onSubmit={onSubmitHandler}>
                   <div className="w-full flex md:flex-row flex-col gap-3">
@@ -71,7 +67,7 @@ function RegisterBox() {
                   </div>
 
                   <div className='p-3 text-center'>
-                      <Button disabled={password != cnfPassword} type='submit' className='dark:bg-violet-600'>Register</Button>
+                      <Button disabled={password != cnfPassword || loading} type='submit' className='dark:bg-violet-600 bg-blue-600 text-white'>{loading ? "Saving..." : 'Register'}</Button>
                   </div>
                 </form>
             </div>

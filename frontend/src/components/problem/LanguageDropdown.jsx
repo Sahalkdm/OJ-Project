@@ -6,7 +6,7 @@ const languages = [
   {key: "cpp", value:"C++"},
 ];
 
-export default function LanguageDropdown({selected, setSelected}) {
+export default function LanguageDropdown({selected, setSelected, onLanguageSelection}) {
   const [open, setOpen] = useState(false);
 
   const selectedLanguage = languages.find((lang) => lang.key === selected)?.value;
@@ -37,7 +37,7 @@ export default function LanguageDropdown({selected, setSelected}) {
             <li
               key={lang.key}
               onClick={() => {
-                setSelected(lang.key);
+                onLanguageSelection(lang.key);
                 setOpen(false);
               }}
               className="px-4 py-2 hover:bg-slate-500 hover:text-white cursor-pointer"

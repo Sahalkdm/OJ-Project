@@ -27,3 +27,6 @@ EXPOSE 8000
 
 # Specify the command to run when the container starts
 CMD [ "node", "index.js" ]
+
+# docker run -p 8000:8000 oj-compiler
+# docker build -t oj-compiler .

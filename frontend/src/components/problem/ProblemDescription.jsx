@@ -1,5 +1,6 @@
 import React from 'react'
 import ReactMarkdown from 'react-markdown';
+import TopicsInfo from './TopicsInfo';
 
 function ProblemDescription({problem}) {
   return (
@@ -72,6 +73,29 @@ function ProblemDescription({problem}) {
               </ul>
             </div>
           )}
+
+          {/* Tags */}
+      {problem.tags && problem.tags.length > 0 && (
+        <div>
+          <h2 className="text-lg flex gap-2 items-center font-semibold mt-4 text-gray-800 dark:text-gray-100">
+            Topics <TopicsInfo/>
+          </h2>
+        <div className="mt-2 flex flex-wrap gap-2">
+          {problem.tags.map((tag, index) => (
+            <span
+              key={index}
+              className="
+                px-3 py-1 text-xs font-medium rounded-full
+                bg-green-100 text-green-800
+                dark:bg-green-900 dark:text-green-200
+              "
+            >
+              {tag}
+            </span>
+          ))}
+          </div>
+        </div>
+        )}
       
           {/* Examples */}
           {problem.examples?.map((ex, idx) => (

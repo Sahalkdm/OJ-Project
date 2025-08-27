@@ -1,34 +1,10 @@
 import React, { useEffect, useState, useMemo } from "react";
-import { GetLeaderboardInfo } from "../../api/problemApi";
-import { toast } from "react-toastify";
+import { CgSearch } from "react-icons/cg";
 
-function LeaderBoardTable() {
-  const [leaderboard, setLeaderboard] = useState([]);
+function LeaderBoardTable({leaderboard, perPage=10}) {
+  // const [leaderboard, setLeaderboard] = useState([]);
   const [search, setSearch] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
-  const perPage = 10;
-
-  useEffect(() => {
-    const fetchLeaderboard = async () => {
-      try {
-        const res = await GetLeaderboardInfo();
-        if (res?.success) {
-          setLeaderboard(res?.leaderboard);
-        } else {
-          handleError(res?.message || "Error loading leaderboard");
-        }
-      } catch (error) {
-        handleError(error?.message || "Error loading leaderboard");
-      }
-    };
-
-    fetchLeaderboard();
-  }, []);
-
-  const handleError = (err) =>
-    toast.error(err, {
-      position: "bottom-left",
-    });
 
   // --- filter leaderboard by search ---
   const filteredData = useMemo(() => {
@@ -72,44 +48,31 @@ function LeaderBoardTable() {
               }}
             />
             <button
-              className="absolute h-8 w-8 right-1 top-1 my-auto px-2 flex items-center bg-transparent rounded"
+              className="absolute text-gray-400 right-1 top-0.5 h-full px-2 bg-transparent rounded"
               type="button"
             >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-                strokeWidth="2.5"
-                stroke="currentColor"
-                className="w-6 h-6 text-slate-600 dark:text-slate-300"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z"
-                />
-              </svg>
+              <CgSearch className="w-5 h-5 my-auto"/>
             </button>
           </div>
         </div>
       </div>
 
       {/* Table */}
-      <div className="relative flex flex-col w-full h-full overflow-x-auto overflow-y-auto text-gray-700 dark:text-gray-200 bg-white dark:bg-slate-900 shadow-lg rounded-lg bg-clip-border transition-colors duration-300">
-        <table className="w-full text-left table-auto min-w-max">
+      <div className="relative pb-3 flex flex-col w-full h-full overflow-x-auto overflow-y-auto text-gray-700 dark:text-gray-200 shadow-lg rounded-lg bg-clip-border transition-colors duration-300">
+        <table className="w-full text-left table-auto min-w-max border-l border-r dark:border-slate-700">
           <thead>
             <tr>
-              <th className="p-4 border-b border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800">
+              <th className="px-4 py-2 border-b border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800">
                 <p className="text-sm font-semibold text-slate-600 dark:text-slate-300">
                   #
                 </p>
               </th>
-              <th className="p-4 border-b border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800">
+              <th className="px-4 py-2 border-b border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800">
                 <p className="text-sm font-semibold text-slate-600 dark:text-slate-300">
                   Name
                 </p>
               </th>
-              <th className="p-4 border-b border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800">
+              <th className="px-4 py-2 border-b border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800">
                 <p className="text-sm font-semibold text-slate-600 dark:text-slate-300">
                   Score
                 </p>
@@ -143,18 +106,18 @@ function LeaderBoardTable() {
                     key={data?.user_id}
                     className="hover:bg-slate-50 dark:hover:bg-slate-800 border-b border-slate-200 dark:border-slate-700 transition-colors"
                   >
-                    <td className="p-4 py-5">
+                    <td className="px-4 py-2 ">
                       <p className={`block font-semibold text-sm ${rankClass}`}>
                         {globalIndex}
                       </p>
                     </td>
-                    <td className="p-4 py-5">
-                      <p className="text-sm text-slate-700 dark:text-slate-200">
+                    <td className="px-4 py-2 ">
+                      <p className="font-medium text-slate-700 dark:text-slate-200">
                         {data?.name}
                       </p>
                     </td>
-                    <td className="p-4 py-5">
-                      <p className="text-sm text-slate-700 dark:text-slate-200">
+                    <td className="px-4 py-2 ">
+                      <p className="text-slate-700 dark:text-slate-200">
                         {data?.totalScore}
                       </p>
                     </td>
@@ -166,7 +129,7 @@ function LeaderBoardTable() {
         </table>
 
         {/* Pagination */}
-        <div className="flex justify-between items-center px-4 py-3 bg-slate-50 dark:bg-slate-800 border-t border-slate-200 dark:border-slate-700">
+        <div className="flex justify-between items-center px-4 py-3 bg-slate-50 dark:bg-slate-800 border-t border-slate-200 dark:border-slate-700 rounded-b-lg">
           <div className="text-sm text-slate-500 dark:text-slate-400">
             Showing{" "}
             <b>

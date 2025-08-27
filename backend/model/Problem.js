@@ -71,11 +71,18 @@ const problemSchema = new mongoose.Schema({
     ref: "User", // references the User model
     required: true,
   },
+
+  isPublic: {
+    type: Boolean,
+    default: true,
+  },
   
   editedBy: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "User", // references the User model
   },
+
+  tags: [{ type: String }],
 
 }, {
   timestamps: true // Automatically adds createdAt and updatedAt

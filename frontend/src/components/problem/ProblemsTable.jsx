@@ -2,16 +2,17 @@ import React, { useMemo } from 'react'
 import { useEffect } from 'react';
 import { useState } from 'react';
 import { DeleteProblem, GetAllProblems } from '../../api/problemApi';
-import { ToastContainer, toast } from "react-toastify";
 import { Link } from 'react-router-dom';
-import { useAuth } from '../../hooks/AuthProvides';
 import ConfirmModal from '../CofirmModal';
 import { FaEdit } from 'react-icons/fa';
 import { RiDeleteBin6Line } from "react-icons/ri";
 import { useSelector } from 'react-redux';
+import { LuCircleCheckBig } from "react-icons/lu";
+import { handleError, handleSuccess } from '../../utils/toastFunctions';
 
 function ProblemsTable() {
   const { user } = useSelector((state) => state.auth);
+  const  tags  = useSelector((state) => state.tags.list);
   const theme = useSelector((state) => state.theme.theme) || "dark"; // dark | light
   const isAdmin = user?.isAdmin || false;
 
@@ -27,13 +28,6 @@ function ProblemsTable() {
 
   const [currentPage, setCurrentPage] = useState(1);
   const pageSize = 8;
-
-  // ===== Error & Success Toasts =====
-  const handleError = (err) =>
-    toast.error(err, { position: "bottom-left" });
-
-  const handleSuccess = (msg) =>
-    toast.success(msg, { position: "bottom-right" });
 
   // ===== Modal Handlers =====
   const handleOpenModal = (id) => {
@@ -51,7 +45,6 @@ function ProblemsTable() {
         handleError(res.message);
       }
     } catch (err) {
-      console.error(err);
       handleError(err.message || "Error deleting problem!");
     } finally {
       setIsModalOpen(false);
@@ -153,10 +146,9 @@ function ProblemsTable() {
             className={"border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 "+(theme === 'dark' ? 'border-gray-600 bg-gray-700 focus:ring-blue-500' : 'focus:ring-gray-500')}
           >
             <option className='p-1' value="">All</option>
-            <option className='p-1' value="Arrays">Arrays</option>
-            <option className='p-1' value="Strings">Strings</option>
-            <option className='p-1' value="DP">Dynamic Programming</option>
-            <option className='p-1' value="Graphs">Graphs</option>
+            {tags?.length > 0 && tags.map(tg=>(
+              <option className='p-1' key={tg._id} value={tg.short_form || tg.name}>{tg.name}</option>
+            ))}
           </select>
         </div>
 
@@ -187,6 +179,7 @@ function ProblemsTable() {
               {isAdmin && <th className="p-4 text-sm font-medium">Edit Cases</th>}
               {isAdmin && <th className="p-4 text-sm font-medium">Edit</th>}
               {isAdmin && <th className="p-4 text-sm font-medium">Delete</th>}
+              {user && <th className="p-4 text-sm font-medium"></th>}
             </tr>
           </thead>
           <tbody>
@@ -242,6 +235,7 @@ function ProblemsTable() {
                       </button>
                     </td>
                   )}
+                  {user && <td className="p-4"><LuCircleCheckBig className={`${problem?.status === 'accepted' ? "text-green-500" : problem?.status === 'attempted' ? "text-orange-400" : "hidden" }`} title={`${problem?.status === 'accepted' ? "Accepted" : problem?.status === 'attempted' ? "Attempted" : "hidden" }`}/></td>}
                 </tr>
               ))
             )}

@@ -20,12 +20,7 @@ export const fetchUser = createAsyncThunk('auth/fetchUser', async (_, { rejectWi
     if (res.success) return res;
     return rejectWithValue(res.message);
   } catch (err) {
-    let error = err // cast the error for access
-    if (!error.res) {
-      throw err
-    }
-    // We got validation errors, let's return those so we can reference in our component and set form errors
-    return rejectWithValue(error.response.data)
+      return rejectWithValue(err?.message || err.response.data || "Error fetching user info")
   }
 })
 
@@ -47,12 +42,7 @@ export const login = createAsyncThunk('auth/login', async (credentials, { reject
     if (response.success) return response;
     return rejectWithValue(response.message);
   } catch (err) {
-    let error = err // cast the error for access
-    if (!error.response) {
-      throw err
-    }
-    // We got validation errors, let's return those so we can reference in our component and set form errors
-    return rejectWithValue(error.response.data)
+    return rejectWithValue(err?.message || err.response.data || "Error during login")
   }
 })
 
@@ -109,7 +99,7 @@ const authSlice = createSlice({
       state.accessToken = action.payload?.token;
     });
     builder.addCase(login.rejected, (state, action) => {
-      state.error = action.payload || "Login failed!!!123";
+      state.error = action.payload || "Login failed!";
       state.loading = false;
     });
 

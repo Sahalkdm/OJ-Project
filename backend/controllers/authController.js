@@ -48,7 +48,6 @@ module.exports.Signup = async (req, res, next) =>{
             user: userResponse,
         });
     }catch (error) {
-        console.error("Registration error:", error);
         
         if (error.name === 'ValidationError') {
             const validationErrors = Object.values(error.errors).map(err => err.message);
@@ -130,7 +129,6 @@ module.exports.Login = async (req, res, next) => {
             })
 
     } catch (error) {
-        console.error("Login error:", error);
         res.status(500).json({
             success: false,
             message: "Internal server error during login"
@@ -151,7 +149,6 @@ module.exports.Logout = async (req, res, next) => {
             message: "Logout successful"
         });
     } catch (error) {
-        console.error("Logout error:", error);
         return res.status(500).json({
             success: false,
             message: "Internal server error during logout"
@@ -177,7 +174,6 @@ module.exports.UserVerification = async (req, res, next) => {
         }
 
     } catch (error) {
-        console.error("Login error:", error);
         res.status(401).json({
             success: false,
             message: "Error verifying user"
@@ -187,7 +183,6 @@ module.exports.UserVerification = async (req, res, next) => {
 
 module.exports.refreshToken = async (req, res) => {
   const token = req.cookies.token;
-  console.log("refreshed Token");
   if (!token) return res.status(401).json({ success: false, message: "Please Login" });
 
   try {

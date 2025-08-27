@@ -1,6 +1,8 @@
 const Problem = require("../model/Problem");
+const { default: Tag } = require("../model/Tag");
 const TestCase = require("../model/TestCase");
 const UserProblemScore = require("../model/UserProblemScore");
+const { default: mongoose } = require("mongoose");
 
 module.exports.createProblem = async (req, res, next) => {
   try {
@@ -11,7 +13,9 @@ module.exports.createProblem = async (req, res, next) => {
       examples,
       constraints,
       input_format,
-      output_format
+      output_format,
+      tags, 
+      isPublic,
     } = req.body;
 
     const user = req.user;
@@ -43,6 +47,8 @@ module.exports.createProblem = async (req, res, next) => {
       input_format: input_format?.trim() || "",
       output_format: output_format?.trim() || "",
       createdBy:user?.id,
+      tags,
+      isPublic: isPublic ? true : false,
     });
 
     res.status(201).json({
@@ -56,7 +62,6 @@ module.exports.createProblem = async (req, res, next) => {
       }
     });
   } catch (error) {
-    console.error("Problem creation error:", error);
 
     // Mongoose validation error
     if (error.name === "ValidationError") {
@@ -85,7 +90,9 @@ module.exports.updateProblem = async (req, res, next) => {
       examples,
       constraints,
       input_format,
-      output_format
+      output_format,
+      tags,
+      isPublic,
     } = req.body;
 
     // Validate required fields
@@ -122,6 +129,8 @@ module.exports.updateProblem = async (req, res, next) => {
     problem.constraints = constraints?.trim() || "";
     problem.input_format = input_format?.trim() || "";
     problem.output_format = output_format?.trim() || "";
+    problem.tags = tags || [];
+    problem.isPublic = isPublic ? true : false,
 
     await problem.save();
 
@@ -136,7 +145,6 @@ module.exports.updateProblem = async (req, res, next) => {
       }
     });
   } catch (error) {
-    console.error("Problem update error:", error);
 
     if (error.name === "ValidationError") {
       const validationErrors = Object.values(error.errors).map((err) => err.message);
@@ -175,7 +183,6 @@ module.exports.deleteProblem = async (req, res, next) => {
       message: "Problem deleted successfully!"
     });
   } catch (error) {
-    console.error("Problem deletion error:", error);
     res.status(500).json({
       success: false,
       message: "Internal server error during problem deletion"
@@ -184,9 +191,68 @@ module.exports.deleteProblem = async (req, res, next) => {
 };
 
 module.exports.GetAllProblems = async (req, res) => {
-  try {
 
-    const problems = await Problem.find({}, { title: 1, difficulty: 1, _id: 1 }); // _id is included by default;
+  const user = req.user;
+  try {
+    let problems
+    if (user){
+      const matchStage = user?.isAdmin ? {} : { isPublic: true };
+    problems = await Problem.aggregate([
+      {
+        $match: matchStage   // 👈 admins see all, users see only public
+      },
+      {
+        $lookup: {
+          from: "userproblemscores", // collection name in MongoDB (check exact)
+          let: { problemId: "$_id" },
+          pipeline: [
+            {
+              $match: {
+                $expr: {
+                  $and: [
+                    { $eq: ["$problem_id", "$$problemId"] },
+                    { $eq: ["$user_id", new mongoose.Types.ObjectId(user?.id)] }
+                  ]
+                }
+              }
+            },
+            { $project: { best_score: 1, _id: 0 } }
+          ],
+          as: "userSubmission"
+        }
+      },
+      {
+        $addFields: {
+          status: {
+            $switch: {
+              branches: [
+                {
+                  case: { $eq: [{ $size: "$userSubmission" }, 0] },
+                  then: "not_visited"
+                },
+                {
+                  case: { $in: [100, "$userSubmission.best_score"] },
+                  then: "accepted"
+                }
+              ],
+              default: "attempted"
+            }
+          }
+        }
+      },
+      {
+        $project: {
+          _id: 1,
+          title: 1,
+          difficulty: 1,
+          tags: 1,
+          status: 1
+        }
+      }
+    ]); // _id is included by default;
+  }else{
+    problems = await Problem.find({ isPublic: true }, { title: 1, difficulty: 1, _id: 1, tags: 1 });
+  }
 
     res.status(200).json({
       success:true,
@@ -246,7 +312,6 @@ module.exports.CreateTestCases = async (req, res) => {
       testCases: inserted,
     });
   } catch (err) {
-    console.error("Error adding test cases:", err);
     res.status(500).json({success:false, message: "Internal server error" });
   }
 }
@@ -296,6 +361,46 @@ module.exports.deleteTestCase = async (req, res) => {
   }
 };
 
+module.exports.AddTags = async (req, res) => {
+  try {
+    const {name, description, short_form} = req.body;
+    if (!name){
+      return res.status(400).json({
+        success:false,
+        message: "Name field is required!"
+      })
+    }
+
+    const data = await Tag.create({name, description, short_form});
+
+    res.status(200).json({
+      success:true, 
+      message: "Tag added successfully!",
+      tag:data
+    })
+  } catch (error) {
+    res.status(500).json({
+      success:false,
+      message: "Error while saving tag!"
+    })
+  }
+}
+
+module.exports.GetTags = async (req, res) => {
+  try {
+    const tags = await Tag.find();
+    res.status(200).json({
+      success:true, 
+      message: "Tags loaded successfully!",
+      tags: tags || []
+    })
+  } catch (error) {
+    res.status(500).json({
+      success:false,
+      message: "Error loading tags!"
+    })
+  }
+}
 
 
 

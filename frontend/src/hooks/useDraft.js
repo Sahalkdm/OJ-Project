@@ -50,7 +50,6 @@ export function useDraft({ problemId, language }) {
 
   const clearDraft = useCallback(async () => {
     if (!dbRef.current) return;
-    console.log(dbRef.current, key)
     await idbDelete(dbRef.current, key);
     setCode("");
   }, [key]);

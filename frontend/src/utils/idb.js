@@ -1,4 +1,6 @@
 // idb.js
+
+// For storing user's code for each problem in indexedDB, will be cleared after logout
 const DB_NAME = "code-drafts";
 const DB_VERSION = 1;
 const STORE = "drafts";

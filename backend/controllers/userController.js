@@ -10,8 +10,7 @@ const Problem = require("../model/Problem");
  * Returns top N users sorted by score
  */
 module.exports.GetLeaderboard = async (req, res) => {
-  const limit = 20; // default top 20
-    console.log(limit)
+  const limit = 50; // default top 20
   try {
     const leaderboard = await UserProblemScore.aggregate([
       {
@@ -48,7 +47,6 @@ module.exports.GetLeaderboard = async (req, res) => {
     });
 
   } catch (error) {
-    console.error("Error fetching leaderboard:", error);
     res.status(500).json({
       success: false,
       message: "Error fetching leaderboard"
@@ -200,7 +198,6 @@ module.exports.GetAllSubmissions = async (req, res) => {
       totalSubmissions: total
     });
   } catch (error) {
-    console.error("Error in GetAllSubmissions:", error);
     res.status(500).json({
       success: false,
       message: "Error loading submissions"
@@ -344,7 +341,6 @@ module.exports.getAdminDashboardStats = async (req, res) => {
       message: "Dashboard stats loaded successfully!",
     });
   } catch (error) {
-    console.error("Dashboard Stats Error:", error);
     return res.status(500).json({
       success: false,
       message: "Error loading dashboard stats",

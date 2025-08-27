@@ -18,6 +18,7 @@ module.exports.RunTestCode = async (req, res) => {
     }
 
     const results = [];
+    // const startAll = Date.now(); // start total timer
     for (let i = 0; i < testCases.length; i++) {
       const { input = "", output: expectedOutput = "" } = testCases[i];
 
@@ -36,7 +37,8 @@ module.exports.RunTestCode = async (req, res) => {
         status: testStatus // OK, CE, RTE, TLE
       });
     }
-
+    // const endAll = Date.now();
+    // const totalExecutionTime = (endAll - startAll) / 1000; // seconds
     res.status(201).json({
       success: true,
       message: "Test cases executed successfully",
@@ -50,10 +52,9 @@ module.exports.RunTestCode = async (req, res) => {
 module.exports.RunCustomTestCode = async (req, res) => {
   try {
     const { code, language, testcase = "" } = req.body;
-    console.log(testcase)
 
     const runResult = await runCodeOnCompiler({ code, language, input:testcase, timeout: 4000 });
-    console.log(runResult)
+
     res.status(201).json({
       success: true,
       message: "Test cases executed successfully",
@@ -62,7 +63,6 @@ module.exports.RunCustomTestCode = async (req, res) => {
       status:runResult?.status
     });
   } catch (err) {
-    console.error("Error running test cases:", err);
     res.status(500).json({ success: false, message: err?.message || "Internal server error", output: '', error: err?.message || "Internal server error", });
   }
 };
@@ -80,6 +80,7 @@ module.exports.SubmitCode = async (req, res) => {
 
     //let passedCount = 0;
     const results = [];
+    // const startAll = Date.now(); // start total timer
     for (let i = 0; i < testCases.length; i++) {
       const { input = "", output: expectedOutput = "", hidden } = testCases[i];
 
@@ -97,13 +98,14 @@ module.exports.SubmitCode = async (req, res) => {
         actualOutput: hidden ? undefined : runResult.output,
         passed: passed,
         error: hidden ? undefined : runResult.error,
-        status: hidden ? undefined : testStatus // OK, WA, CE, RTE, TLE
+        status: testStatus // OK, WA, CE, RTE, TLE
       });
     }
 
     // const totalCount = testCases.length;
     // const score = Math.round((passedCount / totalCount) * 100);
-
+    // const endAll = Date.now();
+    // const totalExecutionTime = (endAll - startAll) / 1000; // seconds
     const { score, status, verdict } = evaluateSubmission(results);
 
     // Save submission in DB
@@ -130,7 +132,6 @@ module.exports.SubmitCode = async (req, res) => {
       score,
     });
   } catch (err) {
-    console.error("Error running test cases:", err);
     res.status(500).json({ success: false, message: err?.message || "Internal server error", output: [] });
   }
 };

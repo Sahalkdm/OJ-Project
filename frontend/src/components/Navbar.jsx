@@ -21,8 +21,6 @@ function Navbar() {
   
   const menuRef = useRef(null);
 
-  console.log(isOpen)
-
   // Close menu when clicking outside
   useEffect(() => {
     function handleClickOutside(event) {
@@ -36,6 +34,7 @@ function Navbar() {
 
   function handleLogout(){
     dispatch(logout());
+    setIsOpen(false);
   }
   
   return (
@@ -90,24 +89,20 @@ function Navbar() {
             <div className="relative block md:hidden" ref={menuRef}>
               <button
                 type="button"
-                onClick={() => {setIsOpen(!isOpen); console.log("clicked1")}}
-                className="flex text-sm bg-gray-800 rounded-full focus:ring-4 focus:ring-gray-600"
+                onClick={() => {setIsOpen(!isOpen)}}
+                className="flex items-center rounded-full focus:ring-4 focus:ring-gray-600"
               >
-                <img
-                  className="w-8 h-8 rounded-full"
-                  src="https://randomuser.me/api/portraits/women/44.jpg"
-                  alt="user avatar"
-                />
+                <FaUserCircle className='h-8 w-8 text-gray-200'/>
               </button>
 
               {isOpen && (
                 <div className="absolute right-0 mt-2 w-48 rounded-lg shadow-lg bg-gray-700 z-50">
                   <div className="px-4 py-3">
                     <span className="block text-sm font-medium text-white">
-                      Bonnie Green
+                      {user?.firstname} {user?.lastname}
                     </span>
                     <span className="block text-sm truncate text-gray-400">
-                      name@flowbite.com
+                      {user?.email}
                     </span>
                   </div>
                   <ul className="py-2">
@@ -181,6 +176,14 @@ function Navbar() {
                 Leaderboard
               </NavLink>
             </li>
+            <li>
+              <NavLink
+                to="/contests"
+                className={({isActive})=>`block py-2 px-3 bg-gray-900 rounded-sm hover:bg-gray-100 md:hover:bg-transparent md:hover:text-blue-700 md:p-0 ${isActive ? 'text-blue-500' : 'text-white '}`}
+              >
+                Contests
+              </NavLink>
+            </li>
             {/* <li>
               <NavLink
                 to="/services"
@@ -202,7 +205,7 @@ function Navbar() {
             <div className="relative hidden md:block" ref={menuRef}>
               <button
                 type="button"
-                onClick={() => {setIsOpen(!isOpen); console.log("clicked2")}}
+                onClick={() => {setIsOpen(!isOpen)}}
                 className="flex items-center rounded-full focus:ring-4 focus:ring-gray-600"
               >
                 <FaUserCircle className='h-8 w-8 text-gray-200'/>
@@ -212,10 +215,10 @@ function Navbar() {
                 <div className="absolute right-0 mt-2 w-48 rounded-lg shadow-lg bg-gray-700 z-50">
                   <div className="px-4 py-3">
                     <span className="block text-sm font-medium text-white">
-                      Bonnie Green
+                      {user?.firstname} {user?.lastname}
                     </span>
                     <span className="block text-sm truncate text-gray-400">
-                      name@flowbite.com
+                      {user?.email}
                     </span>
                   </div>
                   <ul className="py-2">

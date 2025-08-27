@@ -1,12 +1,12 @@
 import React from 'react'
 import { useEffect } from 'react';
 import { useState } from 'react';
-import { GetAllUsers, GetLeaderboardInfo } from '../../api/problemApi';
-import { toast } from "react-toastify";
+import { GetAllUsers } from '../../api/problemApi';
+import { CgSearch } from 'react-icons/cg';
+import { handleError } from '../../utils/toastFunctions';
 
 function UsersList() {
 
-    const [leaderboard, setLeaderboard] = useState([]);
     const [users, setUsers] = useState([]);
     const [page, setPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
@@ -14,13 +14,12 @@ function UsersList() {
     const [loading, setLoading] = useState(false);
     const [search, setSearch] = useState('');
 
-    const limit = 15; // rows per page
+    const limit = 30; // rows per page
 
     const fetchUsers = async () =>{
         setLoading(true);
         try {
             const res = await GetAllUsers(page, limit, search);
-            console.log(res)
             if (res?.success){
                 setUsers(res?.users);
                 setTotalPages(res?.totalPages);
@@ -43,15 +42,6 @@ function UsersList() {
         return () => clearTimeout(delay); // cancel if still typing
     }, [page, search, ])
 
-      const handleError = (err) =>
-        toast.error(err, {
-          position: "bottom-left",
-        });
-    
-      const handleSuccess = (msg) =>
-        toast.success(msg, {
-          position: "bottom-right",
-        });
 
     const handleSearchChange = (e) => {
         setSearch(e.target.value);
@@ -75,23 +65,10 @@ function UsersList() {
                     placeholder="Search Names..."
                 />
                 <button
-                    className="absolute h-8 w-8 right-1 top-1 my-auto px-2 flex items-center bg-white rounded"
-                    type="button"
+                  className="absolute text-gray-400 right-1 top-0.5 h-full px-2 bg-transparent rounded"
+                  type="button"
                 >
-                    <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    strokeWidth="3"
-                    stroke="currentColor"
-                    className="w-8 h-8 text-slate-600"
-                    >
-                    <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z"
-                    />
-                    </svg>
+                  <CgSearch className="w-6 h-6 my-auto"/>
                 </button>
                 </div>
             </div>

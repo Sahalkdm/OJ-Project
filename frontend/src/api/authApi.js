@@ -2,7 +2,7 @@
 import axios from 'axios';
 import api from './axiosInstance';
 
-const BASE_URL = 'http://localhost:8080'; // change to backend URL
+const BASE_URL = import.meta.env.VITE_BACKEND_URL; // change to backend URL
 
 // Register
 export const registerUser = async (userData) => {
@@ -32,7 +32,6 @@ export const loginUser = async (credentials) => {
 export const getCurrentUser = async () => {
     try {
         const res = await api.get(`${BASE_URL}/auth/verify`, { withCredentials: true });
-        console.log(res.data);
         return res.data; // you send back user object from backend
     } catch (error) {
         return {message: error.response?.data || error, success: false} ;
