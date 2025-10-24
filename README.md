@@ -1,7 +1,7 @@
 # OJ-Project
 OJ Project
 
-💻 MyCoddy – Online Judge Platform
+# 💻 MyCoddy – Online Judge Platform
 
 MyCoddy is a secure and scalable online judge platform that allows users to practice coding problems, run test cases, and participate in timed contests — providing a real competitive programming experience.
 
@@ -11,7 +11,7 @@ MyCoddy is a secure and scalable online judge platform that allows users to prac
 
 🎥 Demo Video: Watch the Demo
 
-✨ Key Features (v1)
+# ✨ Key Features (v1)
 
 🔐 Secure Authentication – JWT-based login & registration
 
@@ -37,7 +37,7 @@ Live leaderboard and scoring updates
 
 ⚙️ Docker-Based Code Execution – Safe and isolated environment
 
-🚀 Tech Stack
+# 🚀 Tech Stack
 
 Frontend: React, Vite, Tailwind CSS
 Backend: Node.js, Express.js
@@ -46,7 +46,7 @@ Authentication: JWT
 AI Integration: Google Gemini API
 Infrastructure: Docker (secure execution environment)
 
-💡 Coming Soon – v2
+# 💡 Coming Soon – v2
 
 🔑 Google/GitHub OAuth login
 
